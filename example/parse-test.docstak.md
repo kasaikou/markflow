@@ -1,6 +1,6 @@
-# Scripts for `github.com/kasaikou/run-scripts` developpers
+# Scripts for developpers
 
-```yaml:run-scripts.yml
+```yaml:docstak.yml
 - shells
   - defaults: [`sh`, `powershell`]
 - dotenvs

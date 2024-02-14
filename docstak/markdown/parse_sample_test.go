@@ -17,7 +17,7 @@ func init() {
 
 func TestParseSample(t *testing.T) {
 	wd, _ := os.Getwd()
-	b, e := os.ReadFile(path.Join(wd, "example/parse-test.doctask.md"))
+	b, e := os.ReadFile(path.Join(wd, "example/parse-test.docstak.md"))
 	if e != nil {
 		panic(e)
 	}
