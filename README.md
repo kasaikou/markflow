@@ -17,3 +17,19 @@ It's natural to feel this way because the aforementioned methods are solely focu
 While the aforementioned task runner tools primarily focus on executing scripts, `docstak` allows you to construct workflows along with documentation.
 Please take a look at [`docstak.md`](./docstak.md).
 You'll see that workflows are constructed using standard Markdown syntax, which can be rendered into HTML seamlessly using existing Markdown renderers.
+
+## Contribute
+
+We welcome contributions such as issues and pull requests following the [Code of Conduct](./CODE_OF_CONDUCT.md).
+
+### Language
+
+We understand that forcing the use of English, especially during the early stages of development, can slow down the process unnecessarily.
+Therefore, we will follow the following guidelines for the time being.
+Thank you for your understanding.
+
+| | Language | Notes |
+| :-: | :-: | :-- |
+| Issue & Pull Request | English & Japanese | Please bear with us as English is not our strong suit. |
+| Commit Message | English |  |
+| Code Comment | English |  |
