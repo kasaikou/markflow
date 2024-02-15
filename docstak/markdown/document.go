@@ -8,8 +8,8 @@ import (
 	"github.com/kasaikou/docstak/docstak/model"
 )
 
-func setDocumentTask(ctx context.Context, document *model.DocumentConfig, namePrefix string, result ParseResultTask) error {
-	name := namePrefix + ":" + result.Title
+func setDocumentTask(ctx context.Context, document *model.DocumentConfig, result ParseResultTask) error {
+	name := result.Title
 
 	if _, exist := document.Document.Tasks[name]; exist {
 		return errors.New(fmt.Sprintf("duplicated task: '%s'", name))
@@ -45,7 +45,7 @@ func NewDocFromMarkdown(environment FileEnvironment, result ParseResult) model.N
 		document.Document.Description = result.Description
 
 		for i := range result.Tasks {
-			if err := setDocumentTask(ctx, document, "", result.Tasks[i]); err != nil {
+			if err := setDocumentTask(ctx, document, result.Tasks[i]); err != nil {
 				return err
 			}
 		}
