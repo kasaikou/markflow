@@ -74,6 +74,7 @@ func TestConsoleWriterCR(t *testing.T) {
 			}
 
 		}(cw.chRecord, ConsoleRecord{
+			sender:     &taskWg,
 			RecordMode: RecordModeCR,
 			Kind:       NewStringWidth("TEST"),
 			Label:      NewStringWidth(fmt.Sprintf("TEST_%d", i)),

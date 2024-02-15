@@ -158,8 +158,9 @@ func (cw *ConsoleWriter) Route() {
 					if record.sender == prev.sender {
 						buffer = append(buffer, '\r')
 						for i := 0; i < prevCountLF; i++ {
-							buffer = append(buffer, "\033[1A\033[1T"...)
+							buffer = append(buffer, "\033[1A\033[1T\033[K"...)
 						}
+						buffer = append(buffer, "\033[K"...)
 						buffer = record.AppendBytes(buffer, width)
 
 					} else { // prev.sender != record.sender
