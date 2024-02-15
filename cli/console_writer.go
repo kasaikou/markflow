@@ -60,7 +60,7 @@ func (cr *ConsoleRecord) AppendBytes(src []byte, width int) []byte {
 
 	const (
 		KindWidth   = 8
-		LabelWidth  = 24
+		LabelWidth  = 16
 		PrefixWidth = KindWidth + LabelWidth
 	)
 
@@ -165,9 +165,9 @@ func (cw *ConsoleWriter) Route() {
 					} else { // prev.sender != record.sender
 						buffer = append(buffer, '\r')
 						for i := 0; i < prevCountLF; i++ {
-							buffer = append(buffer, "\033[1A\033[1T"...)
+							buffer = append(buffer, "\033[1A\033[1T\033[K"...)
 						}
-						buffer = append(buffer, "\033[J"...)
+						buffer = append(buffer, "\033[K"...)
 						prev.TextDecoration = Decoration{}
 						prev.Text = "(strip output with CR by docstak)"
 						buffer = prev.AppendBytes(buffer, width)
