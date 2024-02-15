@@ -49,7 +49,7 @@ type ConsoleRecord struct {
 	RecordMode      RecordMode
 	LabelDecoration Decoration
 	Kind            StringWidth // Kind.Width() <= 7
-	Label           StringWidth // Label.Width() <= 23
+	Label           StringWidth // Label.Width() <= 19
 	Text            string
 	TextDecoration  Decoration
 }
@@ -60,7 +60,7 @@ func (cr *ConsoleRecord) AppendBytes(src []byte, width int) []byte {
 
 	const (
 		KindWidth   = 8
-		LabelWidth  = 16
+		LabelWidth  = 20
 		PrefixWidth = KindWidth + LabelWidth
 	)
 
@@ -158,7 +158,7 @@ func (cw *ConsoleWriter) Route() {
 					if record.sender == prev.sender {
 						buffer = append(buffer, '\r')
 						for i := 0; i < prevCountLF; i++ {
-							buffer = append(buffer, "\033[1A\033[1T\033[K"...)
+							buffer = append(buffer, "\033[1A\033[K"...)
 						}
 						buffer = append(buffer, "\033[K"...)
 						buffer = record.AppendBytes(buffer, width)
@@ -166,7 +166,7 @@ func (cw *ConsoleWriter) Route() {
 					} else { // prev.sender != record.sender
 						buffer = append(buffer, '\r')
 						for i := 0; i < prevCountLF; i++ {
-							buffer = append(buffer, "\033[1A\033[1T\033[K"...)
+							buffer = append(buffer, "\033[1A\033[K"...)
 						}
 						buffer = append(buffer, "\033[K"...)
 						prev.TextDecoration = Decoration{}
