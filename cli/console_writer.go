@@ -54,13 +54,16 @@ type ConsoleRecord struct {
 	TextDecoration  Decoration
 }
 
+const RecordKindWidthLimit = 7
+const RecordLabelWidthLimit = 19
+
 var appendBytesSpaces = bytes.Repeat([]byte{' '}, 24)
 
 func (cr *ConsoleRecord) AppendBytes(src []byte, width int) []byte {
 
 	const (
-		KindWidth   = 8
-		LabelWidth  = 20
+		KindWidth   = RecordKindWidthLimit + 1
+		LabelWidth  = RecordLabelWidthLimit + 1
 		PrefixWidth = KindWidth + LabelWidth
 	)
 
