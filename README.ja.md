@@ -16,3 +16,18 @@
 前述したタスクランナーツールが単にスクリプトの実行を主眼に置いているのに対して、 `docstak` はドキュメントとセットでワークフローを構成することができるのです。
 ぜひ [`docstak.md`](./docstak.md) をご覧ください。
 既存の Markdown レンダラーを使うことで問題なく HTML にレンダリング可能な普通の Markdown 記法でワークフローを構成していることがわかります。
+
+## Contribute
+
+[Code of Conduct](./CODE_OF_CONDUCT.md) に則った Issue や Pull Request などのコントリビューションを歓迎します。
+
+### Language
+
+開発初期段階で苦手な英語を無理に使って開発速度を落とすいわれはないので、しばらくは以下の運用で行っていきます。
+よろしくお願いします。
+
+| | 言語 | 補足
+| :-: | :-: | :--
+| Issue & Pull Request | English & Japanese | 英語が苦手なので勘弁してください
+| Commit Message | English |
+| Code comment | English |
