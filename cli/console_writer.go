@@ -196,12 +196,12 @@ func (cw *ConsoleWriter) Route() {
 
 				if len(buffer) > 0 {
 					dest.Write(buffer)
-				}
 
-				if record.RecordMode == RecordModeCR {
-					prevCountLF = bytes.Count(buffer, lfbytes)
+					if record.RecordMode == RecordModeCR {
+						prevCountLF = bytes.Count(buffer, lfbytes)
+					}
+					prev = record
 				}
-				prev = record
 			}
 		}
 	}(cw.dest, cw.chRecord)
