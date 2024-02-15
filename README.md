@@ -1,3 +1,3 @@
-# docstak: Code as Documentation tool
+# docstak: Task Runner as Documentation (TRaD) tool 🥞
 
 Script runner with markdown documentation
