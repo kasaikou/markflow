@@ -29,6 +29,6 @@ go test ...
 
 Format source codes
 
-```sh:/bin/bash
+```sh
 go fmt ...
 ```
