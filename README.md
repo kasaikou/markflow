@@ -2,7 +2,7 @@
 
 ![English](./README.md) ![日本語](./README.ja.md)
 
-# Concepts
+## Concepts
 
 `docstak` is a task runner tool that reads dependencies between scripts and tasks from `.md` files and executes necessary scripts.
 
