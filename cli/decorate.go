@@ -10,7 +10,7 @@ type Decoration struct {
 	Bold       string
 	Italic     string
 	Underline  string
-	NoDisplay  string
+	Display    string
 	Foreground string
 	Background string
 }
@@ -32,43 +32,43 @@ func (d Decoration) Push(expr []byte) Decoration {
 			d.Bold = ""
 			d.Italic = ""
 			d.Underline = ""
-			d.NoDisplay = ""
+			d.Display = ""
 			d.Foreground = ""
 			d.Background = ""
 
 		case expr == "\033[1m":
 			if strings.HasSuffix(d.Bold, "\033[2m") {
-				strings.TrimSuffix(d.Bold, "\033[2m")
+				d.Bold = strings.TrimSuffix(d.Bold, "\033[2m")
 			} else {
 				d.Bold += expr
 			}
 
 		case expr == "\033[2m":
 			if strings.HasSuffix(d.Bold, "\033[1m") {
-				strings.TrimSuffix(d.Bold, "\033[1m")
+				d.Bold = strings.TrimSuffix(d.Bold, "\033[1m")
 			} else {
 				d.Bold += expr
 			}
 
 		case expr == "\033[3m":
 			if strings.HasSuffix(d.Italic, "\033[23m") {
-				strings.TrimSuffix(d.Italic, "\033[23m")
+				d.Italic = strings.TrimSuffix(d.Italic, "\033[23m")
 			} else {
 				d.Italic = expr
 			}
 
 		case expr == "\033[4m":
 			if strings.HasSuffix(d.Underline, "\033[24m") {
-				strings.TrimSuffix(d.Underline, "\033[24m")
+				d.Underline = strings.TrimSuffix(d.Underline, "\033[24m")
 			} else {
 				d.Underline = expr
 			}
 
 		case expr == "\033[8m":
-			if strings.HasSuffix(d.Italic, "\033[28m") {
-				strings.TrimSuffix(d.Italic, "\033[28m")
+			if strings.HasSuffix(d.Display, "\033[28m") {
+				d.Display = strings.TrimSuffix(d.Display, "\033[28m")
 			} else {
-				d.Italic = expr
+				d.Display = expr
 			}
 
 		case expr == "\033[22m":
@@ -76,23 +76,23 @@ func (d Decoration) Push(expr []byte) Decoration {
 
 		case expr == "\033[23m":
 			if strings.HasSuffix(d.Italic, "\033[3m") {
-				strings.TrimSuffix(d.Italic, "\033[3m")
+				d.Italic = strings.TrimSuffix(d.Italic, "\033[3m")
 			} else {
 				d.Italic = expr
 			}
 
 		case expr == "\033[24m":
-			if strings.HasSuffix(d.Italic, "\033[4m") {
-				strings.TrimSuffix(d.Italic, "\033[4m")
+			if strings.HasSuffix(d.Underline, "\033[4m") {
+				d.Underline = strings.TrimSuffix(d.Underline, "\033[4m")
 			} else {
-				d.Italic = expr
+				d.Underline = expr
 			}
 
 		case expr == "\033[28m":
-			if strings.HasSuffix(d.Italic, "\033[8m") {
-				strings.TrimSuffix(d.Italic, "\033[8m")
+			if strings.HasSuffix(d.Display, "\033[8m") {
+				d.Display = strings.TrimSuffix(d.Display, "\033[8m")
 			} else {
-				d.Italic = expr
+				d.Display = expr
 			}
 
 		case expr == "\033[39m":
