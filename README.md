@@ -9,7 +9,8 @@
 Traditionally, executing workflows through scripts involved executing tasks using script files like `.sh`, task runners like `make`, `task`, and other task runner tools.
 However, as the number of build tools increases, or when dealing with large repositories such as monorepos, managing workflows becomes difficult due to the increasing number of workflows.
 
-Typically, documentation is used within a team to share these workflows. However, doesn't synchronizing changes between actual workflows and documentation become tiresome?
+Typically, documentation is used within a team to share these workflows.
+However, doesn't synchronizing changes between actual workflows and documentation become tiresome?
 It's natural to feel this way because the aforementioned methods are solely focused on executing scripts and do not provide documentation functionality.
 
 `docstak` reads Markdown, a means of documentation, and executes it.
