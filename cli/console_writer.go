@@ -10,9 +10,9 @@ import (
 type RecordMode byte
 
 const (
-	RecordModeNA = '\000'
-	RecordModeLF = '\n'
-	RecordModeCR = '\r'
+	RecordModeNA RecordMode = '\000'
+	RecordModeLF RecordMode = '\n'
+	RecordModeCR RecordMode = '\r'
 )
 
 type StringWidth struct {
