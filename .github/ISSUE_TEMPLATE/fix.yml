@@ -1,0 +1,13 @@
+title: Fix
+description: Fix (bug, document, and so on...)
+body:
+  - type: textarea
+    attributes:
+      label: Background
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: TODO
+    validations:
+      required: true
