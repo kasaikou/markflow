@@ -8,12 +8,47 @@ import (
 
 type Decoration struct {
 	Bold       string
+	Faint      string
 	Italic     string
 	Underline  string
 	Display    string
 	Foreground string
 	Background string
 }
+
+const (
+	DC_RESET          = "\033[0m"
+	DC_BOLD           = "\033[1m"
+	DC_FAINT          = "\033[2m"
+	DC_ITALIC         = "\033[3m"
+	DC_UNDERLINE      = "\033[4m"
+	DC_HIDE           = "\033[8m"
+	DC_NORM_INTENSITY = "\033[22m"
+	DC_NOT_ITALIC     = "\033[23m"
+	DC_NOT_UNDERLINE  = "\033[24m"
+	DC_REVEAL         = "\033[28m"
+)
+
+const (
+	FG_BLACK   = "\033[30m"
+	FG_RED     = "\033[31m"
+	FG_GREEN   = "\033[32m"
+	FG_YELLOW  = "\033[33m"
+	FG_BLUE    = "\033[34m"
+	FG_MAGENTA = "\033[35m"
+	FG_CYAN    = "\033[36m"
+	FG_WHITE   = "\033[37m"
+	FG_RESET   = "\033[39m"
+	BG_BLACK   = "\033[40m"
+	BG_RED     = "\033[41m"
+	BG_GREEN   = "\033[42m"
+	BG_YELLOW  = "\033[43m"
+	BG_BLUE    = "\033[44m"
+	BG_MAGENTA = "\033[45m"
+	BG_CYAN    = "\033[46m"
+	BG_WHITE   = "\033[47m"
+	BG_RESET   = "\033[49m"
+)
 
 var decorateRegexp = regexp.MustCompile(`(\033\[(([012348])|(2[2-48])|(([3-49]|10)[0-79])|([34]8;5;[0-9]{1,3})|([34]8;2;[0-9]{1,3};[0-9]{1,3};[0-9]{1,3})))m`)
 
@@ -53,77 +88,47 @@ func (d Decoration) PushString(expr string) Decoration {
 
 func (d Decoration) update(expr string) Decoration {
 	switch {
-	case expr == "\033[0m":
+	case expr == DC_RESET:
 		d.Bold = ""
+		d.Faint = ""
 		d.Italic = ""
 		d.Underline = ""
 		d.Display = ""
 		d.Foreground = ""
 		d.Background = ""
 
-	case expr == "\033[1m":
-		if strings.HasSuffix(d.Bold, "\033[2m") {
-			d.Bold = strings.TrimSuffix(d.Bold, "\033[2m")
-		} else {
-			d.Bold += expr
-		}
+	case expr == DC_BOLD:
+		d.Bold = expr
 
-	case expr == "\033[2m":
-		if strings.HasSuffix(d.Bold, "\033[1m") {
-			d.Bold = strings.TrimSuffix(d.Bold, "\033[1m")
-		} else {
-			d.Bold += expr
-		}
+	case expr == DC_FAINT:
+		d.Faint = expr
 
-	case expr == "\033[3m":
-		if strings.HasSuffix(d.Italic, "\033[23m") {
-			d.Italic = strings.TrimSuffix(d.Italic, "\033[23m")
-		} else {
-			d.Italic = expr
-		}
+	case expr == DC_ITALIC:
+		d.Italic = expr
 
-	case expr == "\033[4m":
-		if strings.HasSuffix(d.Underline, "\033[24m") {
-			d.Underline = strings.TrimSuffix(d.Underline, "\033[24m")
-		} else {
-			d.Underline = expr
-		}
+	case expr == DC_UNDERLINE:
+		d.Underline = expr
 
-	case expr == "\033[8m":
-		if strings.HasSuffix(d.Display, "\033[28m") {
-			d.Display = strings.TrimSuffix(d.Display, "\033[28m")
-		} else {
-			d.Display = expr
-		}
+	case expr == DC_HIDE:
+		d.Display = expr
 
-	case expr == "\033[22m":
+	case expr == DC_NORM_INTENSITY:
 		d.Bold = ""
+		d.Faint = ""
 
-	case expr == "\033[23m":
-		if strings.HasSuffix(d.Italic, "\033[3m") {
-			d.Italic = strings.TrimSuffix(d.Italic, "\033[3m")
-		} else {
-			d.Italic = expr
-		}
+	case expr == DC_NOT_ITALIC:
+		d.Italic = expr
 
-	case expr == "\033[24m":
-		if strings.HasSuffix(d.Underline, "\033[4m") {
-			d.Underline = strings.TrimSuffix(d.Underline, "\033[4m")
-		} else {
-			d.Underline = expr
-		}
+	case expr == DC_NOT_UNDERLINE:
+		d.Underline = expr
 
-	case expr == "\033[28m":
-		if strings.HasSuffix(d.Display, "\033[8m") {
-			d.Display = strings.TrimSuffix(d.Display, "\033[8m")
-		} else {
-			d.Display = expr
-		}
+	case expr == DC_REVEAL:
+		d.Display = expr
 
-	case expr == "\033[39m":
+	case expr == FG_RESET:
 		d.Foreground = ""
 
-	case expr == "\033[49m":
+	case expr == BG_RESET:
 		d.Background = ""
 
 	case strings.HasPrefix(expr, "\033[3") || strings.HasPrefix(expr, "\033[9"):
@@ -142,6 +147,10 @@ func (d *Decoration) AppendBytes(src []byte) []byte {
 
 	if len(d.Bold) > 0 {
 		src = append(src, d.Bold...)
+	}
+
+	if len(d.Faint) > 0 {
+		src = append(src, d.Faint...)
 	}
 
 	if len(d.Italic) > 0 {
