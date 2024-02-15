@@ -31,6 +31,7 @@ type NewDocumentOption func(ctx context.Context, d *DocumentConfig) error
 
 func NewDocument(ctx context.Context, options ...NewDocumentOption) (Document, error) {
 	document := DocumentConfig{
+		ExecPathResolver: map[string]string{},
 		Document: Document{
 			Tasks: map[string]DocumentTask{},
 		},
