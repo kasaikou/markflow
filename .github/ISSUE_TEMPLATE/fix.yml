@@ -1,4 +1,5 @@
-title: Fix
+name: Fix
+title: "Fix: "
 description: Fix (bug, document, and so on...)
 body:
   - type: textarea
