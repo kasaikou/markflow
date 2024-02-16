@@ -2,10 +2,13 @@ package markdown
 
 import (
 	"context"
-	"errors"
 	"fmt"
+	"os"
 	"regexp"
 	"unsafe"
+
+	"github.com/cockroachdb/errors"
+	"github.com/kasaikou/docstak/docstak/resolver"
 
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/ast"
@@ -21,6 +24,12 @@ type ParseResult struct {
 	Title       string
 	Description string
 	Tasks       []ParseResultTask
+	Config      ParseResultGlobalConfig
+}
+
+type ParseResultGlobalConfig struct {
+	Root    string                    `json:"root" yaml:"root"`
+	Environ ParseResultTaskConfigEnvs `json:"environ" yaml:"environ"`
 }
 
 type ParseResultTask struct {
@@ -32,6 +41,12 @@ type ParseResultTask struct {
 }
 
 type ParseResultTaskConfig struct {
+	Environ ParseResultTaskConfigEnvs `json:"environ" yaml:"environ"`
+}
+
+type ParseResultTaskConfigEnvs struct {
+	Dotenvs   []string          `json:"dotenv" yaml:"dotenv"`
+	Variables map[string]string `json:"vars" yaml:"vars"`
 }
 
 type ParseResultCommand struct {
@@ -43,9 +58,30 @@ var (
 	yamlConfigRule = regexp.MustCompile(`^ya?ml:doctask.ya?ml$`)
 )
 
-func ParseMarkdown(ctx context.Context, markdown []byte) (ParseResult, error) {
+type MarkdownOption struct {
+	filename string
+	bytes    []byte
+}
+
+func (mo MarkdownOption) Filename() string { return mo.filename }
+
+func FromLocalFile(workingDir, searchname string) (MarkdownOption, error) {
+	filename, exist := resolver.ResolveFileWithBasename(workingDir, searchname)
+	if !exist {
+		return MarkdownOption{}, errors.Errorf("cannot resolve file '%s' in directory '%s'", searchname, workingDir)
+	}
+
+	b, err := os.ReadFile(filename)
+	if err != nil {
+		return MarkdownOption{}, errors.WithMessagef(err, "cannot read file '%s'", filename)
+	}
+
+	return MarkdownOption{filename: filename, bytes: b}, nil
+}
+
+func ParseMarkdown(ctx context.Context, markdown MarkdownOption) (ParseResult, error) {
 	result := ParseResult{}
-	node := goldmark.DefaultParser().Parse(text.NewReader(markdown))
+	node := goldmark.DefaultParser().Parse(text.NewReader(markdown.bytes))
 
 	if node.Kind() != ast.KindDocument {
 		panic(fmt.Sprintf("unexpected node kind (want: %v, have: %v)", ast.KindDocument, node.Kind()))
@@ -83,7 +119,7 @@ func ParseMarkdown(ctx context.Context, markdown []byte) (ParseResult, error) {
 		switch node.Kind() {
 		case ast.KindHeading:
 			node := node.(*ast.Heading)
-			title := node.Text(markdown)
+			title := node.Text(markdown.bytes)
 			titleStr := unsafe.String(unsafe.SliceData(title), len(title))
 			if topHeaderLevel < 1 {
 				topHeaderLevel = node.Level
@@ -91,13 +127,13 @@ func ParseMarkdown(ctx context.Context, markdown []byte) (ParseResult, error) {
 
 			} else { // topHeaderLevel >= 1 (title has been already defined)
 				if node.Level <= topHeaderLevel {
-					return result, errors.New(fmt.Sprintf("markdown has multiple document title ('%s' and '%s')", result.Title, string(node.Text(markdown))))
+					return result, errors.Errorf("markdown has multiple document title ('%s' and '%s')", result.Title, string(node.Text(markdown.bytes)))
 				}
 
 				elemLevel := node.Level - topHeaderLevel
 				if elemLevel > len(selectedElem) {
 					if want := len(selectedElem) + 1; elemLevel > want {
-						return result, errors.New(fmt.Sprintf("jumped header level (want: %d, have: %d) with text '%s'", want, elemLevel, string(node.Text(markdown))))
+						return result, errors.Errorf("jumped header level (want: %d, have: %d) with text '%s'", want, elemLevel, string(node.Text(markdown.bytes)))
 					}
 
 					selectedElem = append(selectedElem, 0)
@@ -114,7 +150,7 @@ func ParseMarkdown(ctx context.Context, markdown []byte) (ParseResult, error) {
 
 		case ast.KindParagraph:
 			node := node.(*ast.Paragraph)
-			desc := node.Text(markdown)
+			desc := node.Text(markdown.bytes)
 			descStr := unsafe.String(unsafe.SliceData(desc), len(desc))
 
 			if descStr == "" {
@@ -142,21 +178,25 @@ func ParseMarkdown(ctx context.Context, markdown []byte) (ParseResult, error) {
 				if lines.Len() == 0 {
 					return []byte{}
 				} else {
-					return markdown[lines.At(0).Start:lines.At(lines.Len()-1).Stop]
+					return markdown.bytes[lines.At(0).Start:lines.At(lines.Len()-1).Stop]
 				}
 			}()
 			codeStr := unsafe.String(unsafe.SliceData(code), len(code))
-			lang := node.Language(markdown)
+			lang := node.Language(markdown.bytes)
 			langStr := unsafe.String(unsafe.SliceData(lang), len(lang))
 
 			if selected == nil {
-
+				if yamlConfigRule.Match(lang) {
+					if err := yaml.Unmarshal(code, &result.Config); err != nil {
+						return result, errors.WithMessage(err, "failed to parse yaml format global config")
+					}
+				}
 			} else { // selected != nil
 				if yamlConfigRule.Match(lang) {
 					if err := yaml.Unmarshal(code, &selected.Config); err != nil {
 						return result, err
 					}
-				} else {
+				} else { // yamlConfigRule.Match(lang) == false
 					selected.Commands = append(selected.Commands, ParseResultCommand{
 						Lang: langStr,
 						Code: codeStr,
