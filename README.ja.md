@@ -1,6 +1,9 @@
-# docstak: Task Runner as Documentation (TRaD) tool 🐶🥞
+<div align="center">
 
-![English](./README.md) ![日本語](./README.ja.md)
+# docstak: Task Runner as a Document (TRaaD) tool<br>🐶🥞
+
+[[English](./README.md)] [[日本語](./README.ja.md)]
+</div>
 
 ## Concepts
 
