@@ -38,8 +38,8 @@ func TestConsoleWriterLF(t *testing.T) {
 
 		}(cw.chRecord, ConsoleRecord{
 			RecordMode: RecordModeLF,
-			Kind:       NewStringWidth("TEST"),
-			Label:      NewStringWidth(fmt.Sprintf("TEST_%d", i)),
+			Kind:       "TEST",
+			Label:      fmt.Sprintf("TEST_%d", i),
 			LabelDecoration: Decoration{
 				Background: fmt.Sprintf("\033[3%dm", i%8),
 			},
@@ -76,8 +76,8 @@ func TestConsoleWriterCR(t *testing.T) {
 		}(cw.chRecord, ConsoleRecord{
 			sender:     &taskWg,
 			RecordMode: RecordModeCR,
-			Kind:       NewStringWidth("TEST"),
-			Label:      NewStringWidth(fmt.Sprintf("TEST_%d", i)),
+			Kind:       "TEST",
+			Label:      fmt.Sprintf("TEST_%d", i),
 			LabelDecoration: Decoration{
 				Background: fmt.Sprintf("\033[3%dm", i%8),
 			},

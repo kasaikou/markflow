@@ -15,21 +15,6 @@ const (
 	RecordModeCR RecordMode = '\r'
 )
 
-type StringWidth struct {
-	text  string
-	width int
-}
-
-func NewStringWidth(text string) StringWidth {
-	return StringWidth{
-		text:  text,
-		width: runewidth.StringWidth(text),
-	}
-}
-
-func (s *StringWidth) String() string { return s.text }
-func (s *StringWidth) Width() int     { return s.width }
-
 func firstLineWithWidthIndex(text string, width int) (idx int) {
 	countWidth := 0
 	for i, r := range text {
@@ -48,8 +33,8 @@ type ConsoleRecord struct {
 	sender          any
 	RecordMode      RecordMode
 	LabelDecoration Decoration
-	Kind            StringWidth // Kind.Width() <= 7
-	Label           StringWidth // Label.Width() <= 19
+	Kind            string // Kind.Width() <= 7
+	Label           string // Label.Width() <= 19
 	Text            string
 	TextDecoration  Decoration
 }
@@ -72,10 +57,10 @@ func (cr *ConsoleRecord) AppendBytes(src []byte, width int) []byte {
 
 	prefixBeginAt := len(src)
 	src = cr.LabelDecoration.AppendBytes(src)
-	src = append(src, cr.Kind.String()...)
-	src = append(src, appendBytesSpaces[:KindWidth-cr.Kind.Width()]...)
-	src = append(src, cr.Label.String()...)
-	src = append(src, appendBytesSpaces[:LabelWidth-cr.Label.Width()]...)
+	src = append(src, cr.Kind...)
+	src = append(src, appendBytesSpaces[:KindWidth-len(cr.Kind)]...)
+	src = append(src, cr.Label...)
+	src = append(src, appendBytesSpaces[:LabelWidth-len(cr.Label)]...)
 	prefixEndAt := len(src)
 	prefix := src[prefixBeginAt:prefixEndAt]
 	src = cr.TextDecoration.AppendBytes(src)
