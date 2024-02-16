@@ -3,10 +3,7 @@ package docstak
 import (
 	"context"
 	"fmt"
-	"io"
 	"log/slog"
-	"os"
-	"sync"
 
 	"github.com/kasaikou/docstak/docstak/model"
 	"github.com/kasaikou/docstak/docstak/srun"
@@ -14,10 +11,15 @@ import (
 
 type executeOptions struct {
 	called []string
+	onExec func(ctx context.Context, task model.DocumentTask, runner *srun.ScriptRunner) (int, error)
 }
 
 func newExecuteOptions() *executeOptions {
-	return &executeOptions{}
+	return &executeOptions{
+		onExec: func(ctx context.Context, task model.DocumentTask, runner *srun.ScriptRunner) (int, error) {
+			return runner.RunContext(ctx)
+		},
+	}
 }
 
 type ExecuteOption func(eo *executeOptions) error
@@ -25,6 +27,13 @@ type ExecuteOption func(eo *executeOptions) error
 func ExecuteOptCalls(keys ...string) ExecuteOption {
 	return func(eo *executeOptions) error {
 		eo.called = append(eo.called, keys...)
+		return nil
+	}
+}
+
+func ExecuteOptPreProcessExec(fn func(ctx context.Context, task model.DocumentTask, runner *srun.ScriptRunner) (int, error)) ExecuteOption {
+	return func(eo *executeOptions) error {
+		eo.onExec = fn
 		return nil
 	}
 }
@@ -49,29 +58,13 @@ func ExecuteContext(ctx context.Context, document model.Document, options ...Exe
 
 		for j := range task.Scripts {
 			runner := srun.NewScriptRunner(task.Scripts[j].ExecPath, task.Scripts[j].Script)
-			stdout, _ := runner.Stdout()
-			stderr, _ := runner.Stderr()
-
-			wg := sync.WaitGroup{}
-			wg.Add(1)
-			go func() {
-				defer wg.Done()
-				io.Copy(os.Stdout, stdout)
-			}()
-			wg.Add(1)
-			go func() {
-				defer wg.Done()
-				io.Copy(os.Stderr, stderr)
-			}()
-			exit, err := runner.RunContext(ctx)
-			wg.Wait()
+			logger.Info("task start", slog.String("task", task.Call))
+			exit, err := option.onExec(ctx, task, runner)
+			logger.Info("task ended", slog.String("task", task.Call), slog.Int("exitCode", exit))
 
 			if err != nil {
-				logger.Error(fmt.Sprintf("error in task '%s'", option.called[i]), slog.String("error", err.Error()))
+				logger.Error("task ended with error", slog.String("task", task.Call), slog.Any("error", err))
 				return -1
-			} else if exit != 0 {
-				logger.Error(fmt.Sprintf("exit code is not %d in task '%s'", exit, option.called[i]))
-				return exit
 			}
 		}
 	}
