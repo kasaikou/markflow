@@ -12,22 +12,22 @@ type ProcessOutputDecoration struct{ Stdout, Stderr Decoration }
 var ProcessOutputDecorations = []ProcessOutputDecoration{
 	{
 		Stdout: Decoration{Foreground: FG_BLUE, Bold: DC_BOLD},
-		Stderr: Decoration{Foreground: FG_WHITE, Background: BG_BLUE},
+		Stderr: Decoration{Foreground: FG_WHITE, Background: BG_BLUE, Bold: DC_BOLD},
 	}, {
 		Stdout: Decoration{Foreground: FG_YELLOW, Bold: DC_BOLD},
-		Stderr: Decoration{Foreground: FG_BLACK, Background: BG_YELLOW},
+		Stderr: Decoration{Foreground: FG_BLACK, Background: BG_YELLOW, Bold: DC_BOLD},
 	}, {
 		Stdout: Decoration{Foreground: FG_CYAN, Bold: DC_BOLD},
-		Stderr: Decoration{Foreground: FG_BLACK, Background: BG_CYAN},
+		Stderr: Decoration{Foreground: FG_BLACK, Background: BG_CYAN, Bold: DC_BOLD},
 	}, {
 		Stdout: Decoration{Foreground: FG_MAGENTA, Bold: DC_BOLD},
-		Stderr: Decoration{Foreground: FG_WHITE, Background: BG_MAGENTA},
+		Stderr: Decoration{Foreground: FG_WHITE, Background: BG_MAGENTA, Bold: DC_BOLD},
 	}, {
 		Stdout: Decoration{Foreground: FG_GREEN, Bold: DC_BOLD},
-		Stderr: Decoration{Foreground: FG_WHITE, Background: BG_GREEN},
+		Stderr: Decoration{Foreground: FG_WHITE, Background: BG_GREEN, Bold: DC_BOLD},
 	}, {
 		Stdout: Decoration{Foreground: FG_RED, Bold: DC_BOLD},
-		Stderr: Decoration{Foreground: FG_WHITE, Background: BG_RED},
+		Stderr: Decoration{Foreground: FG_WHITE, Background: BG_RED, Bold: DC_BOLD},
 	},
 }
 
