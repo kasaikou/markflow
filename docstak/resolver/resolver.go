@@ -1,4 +1,4 @@
-package srun
+package resolver
 
 import (
 	"context"

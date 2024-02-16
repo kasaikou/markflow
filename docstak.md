@@ -1,14 +1,5 @@
 # Scripts for `github.com/kasaikou/docstak` developpers
 
-```yaml:docstak.yml
-- shells
-  - defaults: [`sh`, `powershell`]
-- dotenvs
-  - `.env` required
-- envs
-  - `.env` 
-```
-
 ## download
 
 Download dependencies
@@ -22,7 +13,7 @@ go mod download
 Run go test
 
 ```sh
-go test ...
+DOCSTAK_TEST_WORKSPACE_DIR=$(pwd) go test ./...
 ```
 
 ## fmt
@@ -30,5 +21,5 @@ go test ...
 Format source codes
 
 ```sh
-go fmt ...
+go fmt ./...
 ```

@@ -1,5 +1,5 @@
 {
   "go.testEnvVars": {
-    "WORKSPACE_DIR": "${workspaceFolder}"
+    "DOCSTAK_TEST_WORKSPACE_DIR": "${workspaceFolder}"
   }
 }

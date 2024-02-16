@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"os"
 
 	"github.com/kasaikou/docstak/docstak/model"
 	"github.com/kasaikou/docstak/docstak/srun"
@@ -58,6 +59,16 @@ func ExecuteContext(ctx context.Context, document model.Document, options ...Exe
 
 		for j := range task.Scripts {
 			runner := srun.NewScriptRunner(task.Scripts[j].ExecPath, task.Scripts[j].Script)
+
+			for key, value := range task.Envs {
+				runner.SetEnv(key, value)
+			}
+
+			environ := os.Environ()
+			for i := range environ {
+				runner.SetEnviron(environ[i])
+			}
+
 			logger.Info("task start", slog.String("task", task.Call))
 			exit, err := option.onExec(ctx, task, runner)
 			logger.Info("task ended", slog.String("task", task.Call), slog.Int("exitCode", exit))

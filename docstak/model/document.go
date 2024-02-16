@@ -1,10 +1,14 @@
 package model
 
-import "context"
+import (
+	"context"
+	"path/filepath"
+)
 
 type Document struct {
 	Title       string
 	Description string
+	Rootdir     string
 	Tasks       map[string]DocumentTask
 	GlobalEnvs  map[string]string
 }
@@ -28,6 +32,17 @@ type DocumentTaskScript struct {
 }
 
 type NewDocumentOption func(ctx context.Context, d *DocumentConfig) error
+
+func NewDocOptionRootDir(dirname string) NewDocumentOption {
+	if !filepath.IsAbs(dirname) {
+		panic("dirname must be absolute path")
+	}
+
+	return func(ctx context.Context, d *DocumentConfig) error {
+		d.Document.Rootdir = dirname
+		return nil
+	}
+}
 
 func NewDocument(ctx context.Context, options ...NewDocumentOption) (Document, error) {
 	document := DocumentConfig{

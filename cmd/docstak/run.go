@@ -4,13 +4,14 @@ import (
 	"context"
 	"log/slog"
 	"os"
-	"path"
+	"path/filepath"
 	"sync"
 
 	"github.com/kasaikou/docstak/cli"
 	"github.com/kasaikou/docstak/docstak"
 	"github.com/kasaikou/docstak/docstak/markdown"
 	"github.com/kasaikou/docstak/docstak/model"
+	"github.com/kasaikou/docstak/docstak/resolver"
 	"github.com/kasaikou/docstak/docstak/srun"
 )
 
@@ -28,26 +29,23 @@ func run() int {
 	logger := slog.New(cw.NewLoggerHandler(nil))
 	ctx := docstak.WithLogger(context.Background(), logger)
 	wd, _ := os.Getwd()
-	environment := markdown.FileEnvironment{
-		Filepath: path.Join(wd, "docstak.md"),
+	po, err := markdown.FromLocalFile(wd, "docstak.md")
+	if err != nil {
+		logger.Error("cannot open file", slog.Any("error", err))
 	}
 
-	yml, err := os.ReadFile(environment.Filepath)
+	parsed, err := markdown.ParseMarkdown(ctx, po)
 	if err != nil {
-		logger.Error("cannot open file", slog.String("filepath", environment.Filepath), slog.Any("error", err))
-		return -1
-	}
-	parsed, err := markdown.ParseMarkdown(ctx, yml)
-	if err != nil {
-		logger.Error("cannot parse markdown", slog.String("filepath", environment.Filepath), slog.Any("error", err))
+		logger.Error("cannot parse markdown", slog.String("filepath", po.Filename()), slog.Any("error", err))
 		return -1
 	}
 
 	document, err := model.NewDocument(ctx,
-		srun.NewDocumentWithPathResolver(
-			srun.ResolveOption{Lang: []string{"sh"}, Command: "sh"},
+		model.NewDocOptionRootDir(filepath.Dir(po.Filename())),
+		resolver.NewDocumentWithPathResolver(
+			resolver.ResolveOption{Lang: []string{"sh"}, Command: "sh"},
 		),
-		markdown.NewDocFromMarkdown(environment, parsed),
+		markdown.NewDocFromMarkdownParsing(parsed),
 	)
 
 	if err != nil {

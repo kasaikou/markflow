@@ -3,29 +3,28 @@ package markdown
 import (
 	"context"
 	"os"
-	"path"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func init() {
-	if workspaceDir, exist := os.LookupEnv("WORKSPACE_DIR"); exist {
+	if workspaceDir, exist := os.LookupEnv("DOCSTAK_TEST_WORKSPACE_DIR"); exist {
 		os.Chdir(workspaceDir)
 	}
 }
 
 func TestParseSample(t *testing.T) {
 	wd, _ := os.Getwd()
-	b, e := os.ReadFile(path.Join(wd, "example/parse-test.docstak.md"))
-	if e != nil {
-		panic(e)
-	}
-
-	result, err := ParseMarkdown(context.Background(), b)
+	po, err := FromLocalFile(wd, "docstak.md")
 	if !assert.NoError(t, err) {
 		return
 	}
 
-	assert.Equal(t, "Scripts for developpers", result.Title)
+	result, err := ParseMarkdown(context.Background(), po)
+	if !assert.NoError(t, err) {
+		return
+	}
+
+	assert.Equal(t, "Scripts for github.com/kasaikou/docstak developpers", result.Title)
 }
