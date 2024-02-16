@@ -23,6 +23,7 @@ func NewScriptRunner(execPath string, script string) *ScriptRunner {
 }
 
 func (sr *ScriptRunner) SetWorkingDir(dir string)   { sr.cmd.Dir = dir }
+func (sr *ScriptRunner) SetEnviron(environ string)  { sr.cmd.Env = append(sr.cmd.Env, environ) }
 func (sr *ScriptRunner) SetEnv(key, value string)   { sr.cmd.Env = append(sr.cmd.Env, key+"="+value) }
 func (sr *ScriptRunner) Stdout() (io.Reader, error) { return sr.cmd.StdoutPipe() }
 func (sr *ScriptRunner) Stderr() (io.Reader, error) { return sr.cmd.StderrPipe() }

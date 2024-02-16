@@ -55,7 +55,7 @@ type ParseResultCommand struct {
 }
 
 var (
-	yamlConfigRule = regexp.MustCompile(`^ya?ml:doctask.ya?ml$`)
+	yamlConfigRule = regexp.MustCompile(`^ya?ml:docstak.ya?ml$`)
 )
 
 type MarkdownOption struct {
