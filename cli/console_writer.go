@@ -129,9 +129,9 @@ func (cw *ConsoleWriter) Route() {
 				if !exist {
 					switch prev.RecordMode {
 					case RecordModeCR:
-						buffer = append(buffer, '\r')
+						buffer = append(buffer, "\r\033[0m"...)
 					case RecordModeLF:
-						buffer = append(buffer, '\n')
+						buffer = append(buffer, "\n\033[0m"...)
 					}
 
 					dest.Write(buffer)

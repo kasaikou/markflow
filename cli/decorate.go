@@ -50,7 +50,7 @@ const (
 	BG_RESET   = "\033[49m"
 )
 
-var decorateRegexp = regexp.MustCompile(`(\033\[(([012348])|(2[2-48])|(([3-49]|10)[0-79])|([34]8;5;[0-9]{1,3})|([34]8;2;[0-9]{1,3};[0-9]{1,3};[0-9]{1,3})))m`)
+var decorateRegexp = regexp.MustCompile(`(\033\[(([0-48])|(2[2-48])|(([3-49]|10)[0-79])|([34]8;5;[0-9]{1,3})|([34]8;2;[0-9]{1,3};[0-9]{1,3};[0-9]{1,3})))m`)
 
 func (d Decoration) Push(expr []byte) Decoration {
 	begin := 0

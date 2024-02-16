@@ -7,7 +7,9 @@ import (
 	"regexp"
 )
 
-var LabelPairs = []struct{ Stdout, Stderr Decoration }{
+type ProcessOutputDecoration struct{ Stdout, Stderr Decoration }
+
+var ProcessOutputDecorations = []ProcessOutputDecoration{
 	{
 		Stdout: Decoration{Foreground: FG_BLUE, Bold: DC_BOLD},
 		Stderr: Decoration{Foreground: FG_WHITE, Background: BG_BLUE},
@@ -94,13 +96,14 @@ func (cws *ConsoleWriterScaner) Scan(reader io.Reader) {
 			return 0, nil, nil
 		}
 
-		crIdx := bytes.IndexByte(data, '\r')
-		if crIdx > -1 {
+		if crIdx := bytes.IndexByte(data, '\r'); crIdx > -1 {
 			if data[crIdx+1] == '\n' {
 				return crIdx + 2, data[:crIdx+2], nil
 			} else {
 				return crIdx + 1, data[:crIdx+1], nil
 			}
+		} else if lfIdx := bytes.IndexByte(data, '\n'); lfIdx > -1 {
+			return lfIdx + 1, data[:lfIdx+1], nil
 		}
 
 		if atEOF {
