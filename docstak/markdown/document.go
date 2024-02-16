@@ -2,10 +2,13 @@ package markdown
 
 import (
 	"context"
+	"log/slog"
+	"os"
 	"path"
 	"path/filepath"
 
 	"github.com/cockroachdb/errors"
+	"github.com/kasaikou/docstak/docstak"
 	"github.com/kasaikou/docstak/docstak/environ"
 	"github.com/kasaikou/docstak/docstak/model"
 )
@@ -29,9 +32,16 @@ func setDocumentTask(ctx context.Context, document *model.DocumentConfig, result
 		if !path.IsAbs(result.Config.Environ.Dotenvs[i]) {
 			result.Config.Environ.Dotenvs[i] = path.Join(document.Document.Rootdir, result.Config.Environ.Dotenvs[i])
 		}
-		environ.LoadDotenv(result.Config.Environ.Dotenvs[i], func(key, value string) {
+		err := environ.LoadDotenv(result.Config.Environ.Dotenvs[i], func(key, value string) {
 			config.Envs[key] = value
 		})
+		if err != nil {
+			if os.IsNotExist(err) {
+				docstak.GetLogger(ctx).Warn("dotenv file not found", slog.String("filename", result.Config.Environ.Dotenvs[i]))
+			} else {
+				return err
+			}
+		}
 	}
 
 	for key, value := range result.Config.Environ.Variables {
@@ -74,9 +84,16 @@ func NewDocFromMarkdownParsing(result ParseResult) model.NewDocumentOption {
 			if !path.IsAbs(result.Config.Environ.Dotenvs[i]) {
 				result.Config.Environ.Dotenvs[i] = path.Join(document.Document.Rootdir, result.Config.Environ.Dotenvs[i])
 			}
-			environ.LoadDotenv(result.Config.Environ.Dotenvs[i], func(key, value string) {
+			err := environ.LoadDotenv(result.Config.Environ.Dotenvs[i], func(key, value string) {
 				document.Document.GlobalEnvs[key] = value
 			})
+			if err != nil {
+				if os.IsNotExist(err) {
+					docstak.GetLogger(ctx).Warn("dotenv file not found", slog.String("filename", result.Config.Environ.Dotenvs[i]))
+				} else {
+					return err
+				}
+			}
 		}
 
 		// Set environment variables.
