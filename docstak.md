@@ -23,3 +23,13 @@ Format source codes
 ```sh
 go fmt ./...
 ```
+
+## ci-lint-test
+
+Running on GitHub Actions, local, and so on.
+
+```sh
+docstak download &&
+gofmt -l . &&
+docstak test
+```
