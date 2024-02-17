@@ -5,12 +5,6 @@
 Download dependencies
 
 ```sh
-docstak download:go
-```
-
-### download:go
-
-```sh
 go mod download
 ```
 
