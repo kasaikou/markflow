@@ -4,9 +4,8 @@ on:
       - "**.go"
       - go.mod
       - go.sum
-  push:
-    paths:
-      - ".github/workflows/lint-test.yml"
+      - .github/workflows/lint-test.yml
+      - docstak.md
   workflow_dispatch:
 jobs:
   lint-test:
