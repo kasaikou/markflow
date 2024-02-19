@@ -114,7 +114,7 @@ func ParseMarkdown(ctx context.Context, markdown MarkdownOption) (ParseResult, e
 
 		if selectedElem[0] == len(result.Tasks) {
 			result.Tasks = append(result.Tasks, ParseResultTask{})
-		} else {
+		} else if selectedElem[0] > len(result.Tasks) {
 			panic("jumped element index")
 		}
 
