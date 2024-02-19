@@ -74,6 +74,52 @@ func ExecuteContext(ctx context.Context, document model.Document, options ...Exe
 		}
 
 		for j := range task.Scripts {
+			isSkip := false
+			for i := range task.Skips {
+				enable, err := task.Skips[i].Condition.IsEnable(ctx)
+				if err != nil {
+					recovered, as := task.Skips[i].OnError(err)
+					if !recovered {
+						return -1
+					} else {
+						enable = as
+					}
+				}
+
+				if enable {
+					task.Skips[i].LoggingOnSkip(ctx)
+					isSkip = true
+					break
+				}
+			}
+
+			if isSkip {
+				continue
+			}
+
+			sufficient := true
+			for i := range task.Requires {
+				enable, err := task.Requires[i].Condition.IsEnable(ctx)
+				if err != nil {
+					recovered, as := task.Requires[i].OnError(err)
+					if !recovered {
+						return -1
+					} else {
+						enable = as
+					}
+				}
+
+				if !enable {
+					task.Requires[i].LoggingOnInsufficient(ctx)
+					sufficient = false
+				}
+			}
+
+			if !sufficient {
+				logger.Error("task's required is insufficient", slog.String("task", task.Call))
+				return -1
+			}
+
 			runner := srun.NewScriptRunner(task.Scripts[j].ExecPath, task.Scripts[j].Script)
 
 			for key, value := range task.Envs {

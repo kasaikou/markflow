@@ -34,12 +34,30 @@ type DocumentConfig struct {
 	ExecPathResolver map[string]string
 }
 
+type Condition interface {
+	IsEnable(context.Context) (bool, error)
+}
+
 type DocumentTask struct {
 	Title       string
 	Call        string
 	Description string
 	Scripts     []DocumentTaskScript
 	Envs        map[string]string
+	Skips       []TaskSkipCondition
+	Requires    []TaskRequireCondition
+}
+
+type TaskSkipCondition struct {
+	Condition     Condition
+	OnError       func(err error) (recovered bool, as bool)
+	LoggingOnSkip func(context.Context)
+}
+
+type TaskRequireCondition struct {
+	Condition             Condition
+	OnError               func(err error) (recovered bool, as bool)
+	LoggingOnInsufficient func(context.Context)
 }
 
 type DocumentTaskScript struct {
