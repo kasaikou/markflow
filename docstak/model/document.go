@@ -39,25 +39,21 @@ type Condition interface {
 }
 
 type DocumentTask struct {
+	Parent      *Document
 	Title       string
 	Call        string
 	Description string
 	Scripts     []DocumentTaskScript
 	Envs        map[string]string
-	Skips       []TaskSkipCondition
-	Requires    []TaskRequireCondition
+	Skips       TaskSkipCondition
+	Requires    TaskRequireCondition
 }
 
 type TaskSkipCondition struct {
-	Condition     Condition
-	OnError       func(err error) (recovered bool, as bool)
-	LoggingOnSkip func(context.Context)
 }
 
 type TaskRequireCondition struct {
-	Condition             Condition
-	OnError               func(err error) (recovered bool, as bool)
-	LoggingOnInsufficient func(context.Context)
+	ExistPaths []string
 }
 
 type DocumentTaskScript struct {
