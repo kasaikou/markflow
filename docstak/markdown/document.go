@@ -37,6 +37,7 @@ func setDocumentTask(ctx context.Context, document *model.DocumentConfig, result
 	}
 
 	config := model.DocumentTask{
+		Parent:      &document.Document,
 		Title:       result.Title,
 		Call:        name,
 		Description: result.Description,
@@ -63,6 +64,8 @@ func setDocumentTask(ctx context.Context, document *model.DocumentConfig, result
 	for key, value := range result.Config.Environ.Variables {
 		config.Envs[key] = value
 	}
+
+	config.Requires.ExistPaths = result.Config.Requires.Exists
 
 	for i := range result.Commands {
 		path, exist := document.ExecPathResolver[result.Commands[i].Lang]
