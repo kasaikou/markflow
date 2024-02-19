@@ -19,6 +19,7 @@ package condition
 import (
 	"context"
 	"log/slog"
+	"strings"
 
 	"github.com/bmatcuk/doublestar/v4"
 	"github.com/kasaikou/docstak/docstak"
@@ -36,8 +37,8 @@ type testContainer struct {
 
 type TestOption struct{}
 
-func NewRequiresFromDocumentTask(dt *model.DocumentTask) Requires {
-	requires := Requires{}
+func NewRequiresFromDocumentTask(dt *model.DocumentTask) *Requires {
+	requires := &Requires{}
 	container := testContainer{}
 	for i := range dt.Requires.ExistPaths {
 		container.existFiles = append(container.existFiles, FileIsExisted{
@@ -75,9 +76,9 @@ func (r *Requires) Test(ctx context.Context, opts TestOption) (sufficient bool) 
 
 			} else if !enable {
 				logFns = append(logFns, func() {
-					logFns = append(logFns, func() {
-						logger.Error("cannot found files matched with patterns")
-					})
+					logger.Error("cannot found files matched with patterns",
+						slog.String("pattern", strings.Join(r.container[itemIdx].existFiles[ruleIdx].Config.Rules, " | ")),
+					)
 				})
 				valid = false
 			}

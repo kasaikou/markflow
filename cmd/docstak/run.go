@@ -25,6 +25,7 @@ import (
 
 	"github.com/kasaikou/docstak/cli"
 	"github.com/kasaikou/docstak/docstak"
+	"github.com/kasaikou/docstak/docstak/condition"
 	"github.com/kasaikou/docstak/docstak/markdown"
 	"github.com/kasaikou/docstak/docstak/model"
 	"github.com/kasaikou/docstak/docstak/resolver"
@@ -76,11 +77,17 @@ func run() int {
 
 	return docstak.ExecuteContext(ctx, document,
 		docstak.ExecuteOptCalls(Cmds...),
-		docstak.ExecuteOptPreProcessExec(func(ctx context.Context, task model.DocumentTask, runner *srun.ScriptRunner) (int, error) {
+		docstak.ExecuteOptProcessExec(func(ctx context.Context, task model.DocumentTask, runner *srun.ScriptRunner) (int, error) {
 			decoration := <-chDecoration
 			defer func() {
 				chDecoration <- decoration
 			}()
+
+			sufficient := condition.NewRequiresFromDocumentTask(&task).Test(ctx, condition.TestOption{})
+			if !sufficient {
+				logger.Error("task's require rules are insufficient", slog.String("task", task.Call))
+				return -1, nil
+			}
 
 			stdOutScanner := cw.NewScanner(decoration.Stdout, "STDOUT", task.Title)
 			stdout, _ := runner.Stdout()
