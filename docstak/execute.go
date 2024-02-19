@@ -48,7 +48,7 @@ func ExecuteOptCalls(keys ...string) ExecuteOption {
 	}
 }
 
-func ExecuteOptPreProcessExec(fn func(ctx context.Context, task model.DocumentTask, runner *srun.ScriptRunner) (int, error)) ExecuteOption {
+func ExecuteOptProcessExec(fn func(ctx context.Context, task model.DocumentTask, runner *srun.ScriptRunner) (int, error)) ExecuteOption {
 	return func(eo *executeOptions) error {
 		eo.onExec = fn
 		return nil
@@ -74,6 +74,7 @@ func ExecuteContext(ctx context.Context, document model.Document, options ...Exe
 		}
 
 		for j := range task.Scripts {
+
 			runner := srun.NewScriptRunner(task.Scripts[j].ExecPath, task.Scripts[j].Script)
 
 			for key, value := range task.Envs {

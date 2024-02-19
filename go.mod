@@ -3,6 +3,7 @@ module github.com/kasaikou/docstak
 go 1.21.3
 
 require (
+	github.com/bmatcuk/doublestar/v4 v4.6.1
 	github.com/cockroachdb/errors v1.11.1
 	github.com/joho/godotenv v1.5.1
 	github.com/mattn/go-runewidth v0.0.15

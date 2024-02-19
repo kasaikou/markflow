@@ -57,12 +57,22 @@ type ParseResultTask struct {
 }
 
 type ParseResultTaskConfig struct {
-	Environ ParseResultTaskConfigEnvs `json:"environ" yaml:"environ"`
+	Environ  ParseResultTaskConfigEnvs     `json:"environ" yaml:"environ"`
+	Requires ParseResultTaskConfigRequires `json:"requires" yaml:"requires"`
+	Skips    ParseResultTaskConfigSkips    `json:"skips" yaml:"skips"`
 }
 
 type ParseResultTaskConfigEnvs struct {
 	Dotenvs   []string          `json:"dotenv" yaml:"dotenv"`
 	Variables map[string]string `json:"vars" yaml:"vars"`
+}
+
+type ParseResultTaskConfigSkips struct {
+	Exists []string `json:"exist" yaml:"exist"`
+}
+
+type ParseResultTaskConfigRequires struct {
+	Exists []string `json:"exist" yaml:"exist"`
 }
 
 type ParseResultCommand struct {

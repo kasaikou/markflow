@@ -4,6 +4,11 @@
 
 Download dependencies
 
+```yaml:docstak.yml
+requires:
+  exist: ["go.mod", "go.sum"]
+```
+
 ```sh
 go mod download
 ```
@@ -30,6 +35,7 @@ Running on GitHub Actions, local, and so on.
 
 ```sh
 docstak download &&
+go mod tidy && git diff --no-patch --exit-code go.sum &&
 gofmt -l . &&
 docstak test
 ```

@@ -34,12 +34,26 @@ type DocumentConfig struct {
 	ExecPathResolver map[string]string
 }
 
+type Condition interface {
+	IsEnable(context.Context) (bool, error)
+}
+
 type DocumentTask struct {
+	Parent      *Document
 	Title       string
 	Call        string
 	Description string
 	Scripts     []DocumentTaskScript
 	Envs        map[string]string
+	Skips       TaskSkipCondition
+	Requires    TaskRequireCondition
+}
+
+type TaskSkipCondition struct {
+}
+
+type TaskRequireCondition struct {
+	ExistPaths []string
 }
 
 type DocumentTaskScript struct {
