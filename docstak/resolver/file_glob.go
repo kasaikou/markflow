@@ -2,6 +2,7 @@ package resolver
 
 import (
 	"os"
+	"path/filepath"
 	"slices"
 
 	"github.com/bmatcuk/doublestar/v4"
@@ -45,6 +46,18 @@ func ResolveFileGlob(config FileGlobConfig) ([]string, error) {
 		if matched {
 			results = append(results, candidates[i])
 		}
+	}
+
+	return results, nil
+}
+
+func ResolveFileGlobFullpath(config FileGlobConfig) ([]string, error) {
+	results, err := ResolveFileGlob(config)
+	if err != nil {
+		return results, err
+	}
+	for i := range results {
+		results[i] = filepath.Join(config.Rootdir, results[i])
 	}
 
 	return results, nil
