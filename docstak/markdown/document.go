@@ -68,14 +68,14 @@ func setDocumentTask(ctx context.Context, document *model.DocumentConfig, result
 	config.Requires.ExistPaths = result.Config.Requires.Exists
 
 	for i := range result.Commands {
-		path, exist := document.ExecPathResolver[result.Commands[i].Lang]
+		execConfig, exist := document.ExecPathResolver[result.Commands[i].Lang]
 		if !exist {
 			return errors.Errorf("cannot resolve execute path in defined script language '%s'", result.Commands[i].Lang)
 		}
 
 		config.Scripts = append(config.Scripts, model.DocumentTaskScript{
-			ExecPath: path,
-			Script:   result.Commands[i].Code,
+			Config: execConfig,
+			Script: result.Commands[i].Code,
 		})
 	}
 

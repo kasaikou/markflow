@@ -26,6 +26,8 @@ import (
 type ResolveOption struct {
 	Lang    []string
 	Command string
+	CmdOpt  string
+	Args    []string
 }
 
 func NewDocumentWithPathResolver(options ...ResolveOption) model.NewDocumentOption {
@@ -40,7 +42,11 @@ func NewDocumentWithPathResolver(options ...ResolveOption) model.NewDocumentOpti
 
 					return err
 				}
-				d.ExecPathResolver[options[i].Lang[j]] = execPath
+				d.ExecPathResolver[options[i].Lang[j]] = model.ExecConfig{
+					ExecPath: execPath,
+					CmdOpt:   options[i].CmdOpt,
+					Args:     options[i].Args,
+				}
 			}
 		}
 

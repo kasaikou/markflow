@@ -31,7 +31,13 @@ type Document struct {
 
 type DocumentConfig struct {
 	Document         Document
-	ExecPathResolver map[string]string
+	ExecPathResolver map[string]ExecConfig
+}
+
+type ExecConfig struct {
+	ExecPath string
+	CmdOpt   string
+	Args     []string
 }
 
 type Condition interface {
@@ -57,9 +63,8 @@ type TaskRequireCondition struct {
 }
 
 type DocumentTaskScript struct {
-	ExecPath string
-	Args     []string
-	Script   string
+	Config ExecConfig
+	Script string
 }
 
 type NewDocumentOption func(ctx context.Context, d *DocumentConfig) error
@@ -77,7 +82,7 @@ func NewDocOptionRootDir(dirname string) NewDocumentOption {
 
 func NewDocument(ctx context.Context, options ...NewDocumentOption) (Document, error) {
 	document := DocumentConfig{
-		ExecPathResolver: map[string]string{},
+		ExecPathResolver: map[string]ExecConfig{},
 		Document: Document{
 			Tasks: map[string]DocumentTask{},
 		},
