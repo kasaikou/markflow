@@ -58,6 +58,7 @@ type TaskRequireCondition struct {
 
 type DocumentTaskScript struct {
 	ExecPath string
+	Args     []string
 	Script   string
 }
 

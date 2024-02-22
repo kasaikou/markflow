@@ -75,7 +75,7 @@ func ExecuteContext(ctx context.Context, document model.Document, options ...Exe
 
 		for j := range task.Scripts {
 
-			runner := srun.NewScriptRunner(task.Scripts[j].ExecPath, task.Scripts[j].Script)
+			runner := srun.NewScriptRunner(task.Scripts[j].ExecPath, "-c", task.Scripts[j].Script)
 
 			for key, value := range task.Envs {
 				runner.SetEnv(key, value)

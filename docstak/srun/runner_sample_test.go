@@ -27,7 +27,7 @@ import (
 )
 
 func TestRunnerSample(t *testing.T) {
-	runner := NewScriptRunner("/bin/sh", "echo 'hello world' &&\n echo 'good bye'\n")
+	runner := NewScriptRunner("/bin/sh", "-c", "echo 'hello world' &&\n echo 'good bye'\n")
 	stdout, _ := runner.Stdout()
 	stderr, _ := runner.Stderr()
 
