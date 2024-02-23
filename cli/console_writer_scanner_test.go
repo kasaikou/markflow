@@ -22,6 +22,8 @@ import (
 	"strings"
 	"sync"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestConsoleWriterScanner(t *testing.T) {
@@ -37,4 +39,8 @@ func TestConsoleWriterScanner(t *testing.T) {
 	defer cw.Close()
 	cw.NewScanner(Decoration{}, "TEST", "test_str").
 		Scan(bytes.NewBufferString(strings.Repeat("012345678901234567890123456789\n", 1000)))
+}
+
+func TestAdjustLabel(t *testing.T) {
+	assert.Equal(t, "abcdef/...n/opqrstu", adjustLabel("abcdef/ghijklmn/opqrstu"))
 }
