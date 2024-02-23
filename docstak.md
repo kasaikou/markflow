@@ -1,5 +1,13 @@
 # Scripts for `github.com/kasaikou/docstak` developpers
 
+## hello_world
+
+Echo "Hello World"
+
+```sh
+echo "Hello World, docstak!"
+```
+
 ## download
 
 Download dependencies

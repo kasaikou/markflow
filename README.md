@@ -5,6 +5,33 @@
 [[English](./README.md)] [[日本語](./README.ja.md)]
 </div>
 
+## Getting Started
+
+Write markdown document as configuration file.
+
+````md
+<!-- ./docstak.md -->
+
+# Getting started
+
+## hello_world
+
+Echo "Hello World, docstak!"
+
+```sh
+echo "Hello World, docstak!"
+```
+````
+
+And use `docstak` command.
+
+```terminal
+$ docstak hello_world
+DOCSTAK INFO                task start (task: "hello_world")
+STDOUT  hello_world         Hello World, docstak!
+DOCSTAK INFO                task ended (task: "hello_world", exitCode: 0)
+```
+
 ## Concepts
 
 `docstak` is a task runner tool that reads dependencies between scripts and tasks from `.md` files and executes necessary scripts.
