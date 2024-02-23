@@ -42,6 +42,7 @@ func setDocumentTask(ctx context.Context, document *model.DocumentConfig, result
 		Call:        name,
 		Description: result.Description,
 		Envs:        make(map[string]string),
+		DependTasks: result.Config.Previous,
 	}
 
 	// Read dotenv files.
