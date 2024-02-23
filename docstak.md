@@ -46,7 +46,7 @@ go fmt ./...
 Running on GitHub Actions, local, and so on.
 
 ```yaml:docstak.yml
-previous: [ci/fmt, ci/depends, ci/test]
+previous: [ci/fmt, ci/depends, ci/coverage-test]
 ```
 
 ## ci/depends
