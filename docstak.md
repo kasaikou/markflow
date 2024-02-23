@@ -41,16 +41,46 @@ Format source codes
 go fmt ./...
 ```
 
-## ci-lint-test
+## ci
 
 Running on GitHub Actions, local, and so on.
 
 ```yaml:docstak.yml
-previous: [download]
+previous: [ci/fmt, ci/depends, ci/test]
+```
+
+## ci/depends
+
+```sh
+go mod tidy && git diff --no-patch --exit-code go.sum
+```
+
+## ci/fmt
+
+```sh
+gofmt -l .
+```
+
+## ci/test
+
+```yaml:docstak.yml
+previous: [ci/test/go]
+```
+
+## ci/test/go
+
+```sh
+go test -coverprofile=coverage.txt -covermode=atomic ./...
+```
+
+## ci/test/send-coverage
+
+Send to Codecov's coverage report.
+
+```yaml:docstak.yml
+previous: [ci/test/go]
 ```
 
 ```sh
-go mod tidy && git diff --no-patch --exit-code go.sum &&
-gofmt -l . &&
-docstak test
+codecov upload-process -f coverage.txt -t ${CODECOV_TOKEN}
 ```
