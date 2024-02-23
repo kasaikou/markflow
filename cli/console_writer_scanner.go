@@ -62,7 +62,7 @@ func adjustLabel(label string) string {
 		return label
 	}
 
-	wantWidth := RecordKindWidthLimit - 3
+	wantWidth := RecordLabelWidthLimit - 3
 	first := adjustLabelPrefix.FindStringIndex(label)
 	last := adjustLabelSuffix.FindStringIndex(label)
 
@@ -75,7 +75,7 @@ func adjustLabel(label string) string {
 	} else if suffixLength := last[1] - last[0]; suffixLength > wantWidth-5 {
 		prefixSize = 5
 		suffixSize = wantWidth - prefixSize
-	} else if prefixLength := first[1] - last[0]; prefixLength > wantWidth-5 {
+	} else if prefixLength := first[1] - first[0]; prefixLength > wantWidth-5 {
 		suffixSize = 5
 		prefixSize = wantWidth - suffixSize
 	} else if prefixLength+suffixLength > wantWidth {

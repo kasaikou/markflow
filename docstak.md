@@ -41,16 +41,34 @@ Format source codes
 go fmt ./...
 ```
 
-## ci-lint-test
+## ci
 
 Running on GitHub Actions, local, and so on.
 
 ```yaml:docstak.yml
-previous: [download]
+previous: [ci/fmt, ci/depends, ci/coverage-test]
 ```
 
+## ci/depends
+
 ```sh
-go mod tidy && git diff --no-patch --exit-code go.sum &&
-gofmt -l . &&
-docstak test
+go mod tidy && git diff --no-patch --exit-code go.sum
+```
+
+## ci/fmt
+
+```sh
+gofmt -l .
+```
+
+## ci/coverage-test
+
+```yaml:docstak.yml
+previous: [ci/coverage-test/go]
+```
+
+## ci/coverage-test/go
+
+```sh
+go test -coverprofile=coverage.txt -covermode=atomic ./...
 ```

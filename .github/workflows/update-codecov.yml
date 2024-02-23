@@ -1,12 +1,7 @@
 on:
-  pull_request:
-    paths:
-      - "**.go"
-      - go.mod
-      - go.sum
-      - .github/workflows/lint-test.yml
-      - docstak.md
-  workflow_dispatch:
+  push:
+    branches:
+      - main
 jobs:
   lint-test:
     runs-on: ubuntu-latest
@@ -20,7 +15,7 @@ jobs:
       - name: docstak/install
         run: go install ./cmd/docstak
       - name: docstak/ci
-        run: docstak ci
+        run: docstak ci/coverage-test
       - uses: codecov/codecov-action@v4.0.1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
