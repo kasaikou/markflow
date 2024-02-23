@@ -3,7 +3,36 @@
 # docstak: Task Runner as a Document (TRaaD) tool<br>🐶🥞
 
 [[English](./README.md)] [[日本語](./README.ja.md)]
+
+[![codecov](https://codecov.io/gh/kasaikou/docstak/graph/badge.svg?token=QZTCJ1A852)](https://codecov.io/gh/kasaikou/docstak)
 </div>
+
+## Getting Started
+
+Markdown ファイルを設定ファイルとして記述します。
+
+````md
+<!-- ./docstak.md -->
+
+# Getting started
+
+## hello_world
+
+Echo "Hello World, docstak!"
+
+```sh
+echo "Hello World, docstak!"
+```
+````
+
+そして `docstak` コマンドを実行します.
+
+```terminal
+$ docstak hello_world
+DOCSTAK INFO                task start (task: "hello_world")
+STDOUT  hello_world         Hello World, docstak!
+DOCSTAK INFO                task ended (task: "hello_world", exitCode: 0)
+```
 
 ## Concepts
 
