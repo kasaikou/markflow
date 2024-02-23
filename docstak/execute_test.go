@@ -37,8 +37,11 @@ func TestExecute(t *testing.T) {
 				Call:  "echo",
 				Scripts: []model.DocumentTaskScript{
 					{
-						ExecPath: "bash",
-						Script:   "echo 'hello world'",
+						Config: model.ExecConfig{
+							ExecPath: "sh",
+							CmdOpt:   "-c",
+						},
+						Script: "echo 'hello world'",
 					},
 				},
 			},

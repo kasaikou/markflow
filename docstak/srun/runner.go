@@ -29,9 +29,11 @@ type ScriptRunner struct {
 	cmd *exec.Cmd
 }
 
-func NewScriptRunner(execPath string, script string) *ScriptRunner {
+func NewScriptRunner(execPath string, cmdOpt string, script string, args ...string) *ScriptRunner {
+
+	args = append(args, cmdOpt, script)
 	runner := &ScriptRunner{
-		cmd: exec.Command(execPath),
+		cmd: exec.Command(execPath, args...),
 	}
 
 	runner.cmd.Stdin = bytes.NewBufferString(script)

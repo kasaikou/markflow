@@ -20,12 +20,15 @@ import (
 	"context"
 	"os/exec"
 
+	"github.com/cockroachdb/errors"
 	"github.com/kasaikou/docstak/docstak/model"
 )
 
 type ResolveOption struct {
 	Lang    []string
 	Command string
+	CmdOpt  string
+	Args    []string
 }
 
 func NewDocumentWithPathResolver(options ...ResolveOption) model.NewDocumentOption {
@@ -34,13 +37,17 @@ func NewDocumentWithPathResolver(options ...ResolveOption) model.NewDocumentOpti
 			for j := range options[i].Lang {
 				execPath, err := exec.LookPath(options[i].Command)
 				if err != nil {
-					if err == exec.ErrNotFound {
+					if errors.Is(err, exec.ErrNotFound) {
 						continue
 					}
 
 					return err
 				}
-				d.ExecPathResolver[options[i].Lang[j]] = execPath
+				d.ExecPathResolver[options[i].Lang[j]] = model.ExecConfig{
+					ExecPath: execPath,
+					CmdOpt:   options[i].CmdOpt,
+					Args:     options[i].Args,
+				}
 			}
 		}
 

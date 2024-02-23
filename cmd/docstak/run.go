@@ -60,7 +60,11 @@ func run() int {
 	document, err := model.NewDocument(ctx,
 		model.NewDocOptionRootDir(filepath.Dir(po.Filename())),
 		resolver.NewDocumentWithPathResolver(
-			resolver.ResolveOption{Lang: []string{"sh"}, Command: "sh"},
+			resolver.ResolveOption{Lang: []string{"sh", "shell"}, Command: "sh", CmdOpt: "-c"},
+			resolver.ResolveOption{Lang: []string{"bash"}, Command: "bash", CmdOpt: "-c"},
+			resolver.ResolveOption{Lang: []string{"powershell", "posh"}, Command: "powershell", CmdOpt: "-Command"},
+			resolver.ResolveOption{Lang: []string{"py", "python"}, Command: "python", CmdOpt: "-c"},
+			resolver.ResolveOption{Lang: []string{"js", "javascript"}, Command: "node", CmdOpt: "-e"},
 		),
 		markdown.NewDocFromMarkdownParsing(parsed),
 	)
