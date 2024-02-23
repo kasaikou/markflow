@@ -117,6 +117,7 @@ func executeTasks(ctx context.Context, document model.Document, option *executeO
 
 	for i := range executeTasks {
 		ch := make(chan taskResp, len(executeTasks))
+		defer close(ch)
 		task := document.Tasks[executeTasks[i]]
 		wg.Add(1)
 		go func(ctx context.Context, task model.DocumentTask, chEnded <-chan taskResp, chRes chan<- taskResp) {
