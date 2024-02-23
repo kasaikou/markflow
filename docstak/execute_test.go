@@ -50,3 +50,132 @@ func TestExecute(t *testing.T) {
 
 	docstak.ExecuteContext(ctx, document, docstak.ExecuteOptCalls("echo"))
 }
+func TestExecuteParallel(t *testing.T) {
+	logger := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{}))
+	ctx := docstak.WithLogger(context.Background(), logger)
+
+	document := model.Document{
+		Tasks: map[string]model.DocumentTask{
+			"echo-parallel-1": {
+				Title: "echo-parallel-1",
+				Call:  "echo-parallel-1",
+				Scripts: []model.DocumentTaskScript{
+					{
+						Config: model.ExecConfig{
+							ExecPath: "sh",
+							CmdOpt:   "-c",
+						},
+						Script: "echo 'hello world'",
+					},
+				},
+			},
+			"echo-parallel-2": {
+				Title: "echo-parallel-2",
+				Call:  "echo-parallel-2",
+				Scripts: []model.DocumentTaskScript{
+					{
+						Config: model.ExecConfig{
+							ExecPath: "sh",
+							CmdOpt:   "-c",
+						},
+						Script: "echo 'hello world'",
+					},
+				},
+			},
+			"echo-parallel-3": {
+				Title: "echo-parallel-3",
+				Call:  "echo-parallel-3",
+				Scripts: []model.DocumentTaskScript{
+					{
+						Config: model.ExecConfig{
+							ExecPath: "sh",
+							CmdOpt:   "-c",
+						},
+						Script: "echo 'hello world'",
+					},
+				},
+			},
+			"echo-parallel-4": {
+				Title: "echo-parallel-4",
+				Call:  "echo-parallel-4",
+				Scripts: []model.DocumentTaskScript{
+					{
+						Config: model.ExecConfig{
+							ExecPath: "sh",
+							CmdOpt:   "-c",
+						},
+						Script: "echo 'hello world'",
+					},
+				},
+			},
+		},
+	}
+
+	docstak.ExecuteContext(ctx, document, docstak.ExecuteOptCalls("echo-parallel-1", "echo-parallel-2", "echo-parallel-3", "echo-parallel-4"))
+}
+func TestExecuteDepends(t *testing.T) {
+	logger := slog.New(slog.NewTextHandler(os.Stderr, &slog.HandlerOptions{}))
+	ctx := docstak.WithLogger(context.Background(), logger)
+
+	document := model.Document{
+		Tasks: map[string]model.DocumentTask{
+			"echo-parallel-1": {
+				Title: "echo-parallel-1",
+				Call:  "echo-parallel-1",
+				Scripts: []model.DocumentTaskScript{
+					{
+						Config: model.ExecConfig{
+							ExecPath: "sh",
+							CmdOpt:   "-c",
+						},
+						Script: "echo 'hello world'",
+					},
+				},
+			},
+			"echo-parallel-2": {
+				Title: "echo-parallel-2",
+				Call:  "echo-parallel-2",
+				Scripts: []model.DocumentTaskScript{
+					{
+						Config: model.ExecConfig{
+							ExecPath: "sh",
+							CmdOpt:   "-c",
+						},
+						Script: "echo 'hello world'",
+					},
+				},
+				DependTasks: []string{"echo-parallel-1"},
+			},
+			"echo-parallel-3": {
+				Title: "echo-parallel-3",
+				Call:  "echo-parallel-3",
+				Scripts: []model.DocumentTaskScript{
+					{
+						Config: model.ExecConfig{
+							ExecPath: "sh",
+							CmdOpt:   "-c",
+						},
+						Script: "echo 'hello world'",
+					},
+				},
+				DependTasks: []string{"echo-parallel-2"},
+			},
+			"echo-parallel-4": {
+				Title: "echo-parallel-4",
+				Call:  "echo-parallel-4",
+				Scripts: []model.DocumentTaskScript{
+					{
+						Config: model.ExecConfig{
+							ExecPath: "sh",
+							CmdOpt:   "-c",
+						},
+						Script: "echo 'hello world'",
+					},
+				},
+				DependTasks: []string{"echo-parallel-3"},
+			},
+		},
+	}
+
+	docstak.ExecuteContext(ctx, document, docstak.ExecuteOptCalls("echo-parallel-4"))
+}

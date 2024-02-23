@@ -25,6 +25,10 @@ go mod download
 
 Run go test
 
+```yaml:docstak.yml
+previous: [download]
+```
+
 ```sh
 DOCSTAK_TEST_WORKSPACE_DIR=$(pwd) go test ./...
 ```
@@ -41,8 +45,11 @@ go fmt ./...
 
 Running on GitHub Actions, local, and so on.
 
+```yaml:docstak.yml
+previous: [download]
+```
+
 ```sh
-docstak download &&
 go mod tidy && git diff --no-patch --exit-code go.sum &&
 gofmt -l . &&
 docstak test

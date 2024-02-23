@@ -60,6 +60,7 @@ type ParseResultTaskConfig struct {
 	Environ  ParseResultTaskConfigEnvs     `json:"environ" yaml:"environ"`
 	Requires ParseResultTaskConfigRequires `json:"requires" yaml:"requires"`
 	Skips    ParseResultTaskConfigSkips    `json:"skips" yaml:"skips"`
+	Previous []string                      `json:"previous" yaml:"previous"`
 }
 
 type ParseResultTaskConfigEnvs struct {

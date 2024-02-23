@@ -19,6 +19,9 @@ package model
 import (
 	"context"
 	"path/filepath"
+	"strings"
+
+	"github.com/cockroachdb/errors"
 )
 
 type Document struct {
@@ -53,6 +56,7 @@ type DocumentTask struct {
 	Envs        map[string]string
 	Skips       TaskSkipCondition
 	Requires    TaskRequireCondition
+	DependTasks []string
 }
 
 type TaskSkipCondition struct {
@@ -94,5 +98,74 @@ func NewDocument(ctx context.Context, options ...NewDocumentOption) (Document, e
 		}
 	}
 
+	if err := validateIsTaskDependencyCirculated(document.Document); err != nil {
+		return document.Document, err
+	}
+
 	return document.Document, nil
+}
+
+func validateIsTaskDependencyCirculated(document Document) error {
+
+	mpRead := map[string]map[string]struct{}{}
+	history := make([]string, 0, len(document.Tasks))
+	for task := range document.Tasks {
+		history := history[:0]
+		if err := validateIsTaskDependencyCirculatedInternal(task, history, mpRead, document); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+var ErrCirculatedDependency = errors.New("task dependency is circulated")
+
+func validateIsTaskDependencyCirculatedInternal(task string, mpHistory []string, mpDepends map[string]map[string]struct{}, document Document) error {
+
+	if _, exist := mpDepends[task]; exist {
+		return nil
+	}
+
+	errCirculated := func(task string) error {
+		return errors.WithDetail(ErrCirculatedDependency, strings.Join(append(mpHistory, task+" (circulated)"), " -> "))
+	}
+
+	depends := map[string]struct{}{}
+
+	mpHistory = append(mpHistory, task)
+	t := document.Tasks[task]
+	for i := range t.DependTasks {
+		depends[t.DependTasks[i]] = struct{}{}
+
+		for j := range mpHistory {
+			if t.DependTasks[i] == mpHistory[j] {
+				return errCirculated(t.DependTasks[i])
+			}
+		}
+
+		if indirectDepends, cached := mpDepends[t.DependTasks[i]]; cached {
+			for dependTask := range indirectDepends {
+				for j := range mpHistory {
+					if dependTask == mpHistory[j] {
+						return errCirculated("..." + dependTask)
+					}
+				}
+				depends[dependTask] = struct{}{}
+			}
+
+		} else {
+			err := validateIsTaskDependencyCirculatedInternal(t.DependTasks[i], mpHistory, mpDepends, document)
+			if err != nil {
+				return err
+			}
+
+			indirectDepends := mpDepends[t.DependTasks[i]]
+			for dependTask := range indirectDepends {
+				depends[dependTask] = struct{}{}
+			}
+		}
+	}
+
+	mpDepends[task] = depends
+	return nil
 }
