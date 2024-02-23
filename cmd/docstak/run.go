@@ -20,15 +20,13 @@ import (
 	"context"
 	"log/slog"
 	"os"
-	"path/filepath"
 	"sync"
 
+	"github.com/kasaikou/docstak/app"
 	"github.com/kasaikou/docstak/cli"
 	"github.com/kasaikou/docstak/docstak"
 	"github.com/kasaikou/docstak/docstak/condition"
-	"github.com/kasaikou/docstak/docstak/markdown"
 	"github.com/kasaikou/docstak/docstak/model"
-	"github.com/kasaikou/docstak/docstak/resolver"
 	"github.com/kasaikou/docstak/docstak/srun"
 )
 
@@ -45,32 +43,8 @@ func run() int {
 
 	logger := slog.New(cw.NewLoggerHandler(nil))
 	ctx := docstak.WithLogger(context.Background(), logger)
-	wd, _ := os.Getwd()
-	po, err := markdown.FromLocalFile(wd, "docstak.md")
-	if err != nil {
-		logger.Error("cannot open file", slog.Any("error", err))
-	}
-
-	parsed, err := markdown.ParseMarkdown(ctx, po)
-	if err != nil {
-		logger.Error("cannot parse markdown", slog.String("filepath", po.Filename()), slog.Any("error", err))
-		return -1
-	}
-
-	document, err := model.NewDocument(ctx,
-		model.NewDocOptionRootDir(filepath.Dir(po.Filename())),
-		resolver.NewDocumentWithPathResolver(
-			resolver.ResolveOption{Lang: []string{"sh", "shell"}, Command: "sh", CmdOpt: "-c"},
-			resolver.ResolveOption{Lang: []string{"bash"}, Command: "bash", CmdOpt: "-c"},
-			resolver.ResolveOption{Lang: []string{"powershell", "posh"}, Command: "powershell", CmdOpt: "-Command"},
-			resolver.ResolveOption{Lang: []string{"py", "python"}, Command: "python", CmdOpt: "-c"},
-			resolver.ResolveOption{Lang: []string{"js", "javascript"}, Command: "node", CmdOpt: "-e"},
-		),
-		markdown.NewDocFromMarkdownParsing(parsed),
-	)
-
-	if err != nil {
-		logger.Error("failed to initialize document", slog.String("error", err.Error()))
+	document, success := app.NewDocument(ctx)
+	if !success {
 		return -1
 	}
 
