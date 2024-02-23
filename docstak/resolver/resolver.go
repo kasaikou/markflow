@@ -20,6 +20,7 @@ import (
 	"context"
 	"os/exec"
 
+	"github.com/cockroachdb/errors"
 	"github.com/kasaikou/docstak/docstak/model"
 )
 
@@ -36,7 +37,7 @@ func NewDocumentWithPathResolver(options ...ResolveOption) model.NewDocumentOpti
 			for j := range options[i].Lang {
 				execPath, err := exec.LookPath(options[i].Command)
 				if err != nil {
-					if err == exec.ErrNotFound {
+					if errors.Is(err, exec.ErrNotFound) {
 						continue
 					}
 
