@@ -53,6 +53,7 @@ type DocumentTask struct {
 	Envs        map[string]string
 	Skips       TaskSkipCondition
 	Requires    TaskRequireCondition
+	DependTasks []string
 }
 
 type TaskSkipCondition struct {

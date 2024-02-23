@@ -21,14 +21,16 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"runtime"
 
 	"github.com/kasaikou/docstak/docstak/model"
 	"github.com/kasaikou/docstak/docstak/srun"
 )
 
 type executeOptions struct {
-	called []string
-	onExec func(ctx context.Context, task model.DocumentTask, runner *srun.ScriptRunner) (int, error)
+	called    []string
+	onExec    func(ctx context.Context, task model.DocumentTask, runner *srun.ScriptRunner) (int, error)
+	numWorker int
 }
 
 func newExecuteOptions() *executeOptions {
@@ -36,6 +38,7 @@ func newExecuteOptions() *executeOptions {
 		onExec: func(ctx context.Context, task model.DocumentTask, runner *srun.ScriptRunner) (int, error) {
 			return runner.RunContext(ctx)
 		},
+		numWorker: runtime.NumCPU(),
 	}
 }
 
@@ -66,12 +69,25 @@ func ExecuteContext(ctx context.Context, document model.Document, options ...Exe
 		}
 	}
 
-	for i := range option.called {
-		task, exist := document.Tasks[option.called[i]]
+	executeTasks := map[string]struct{}{}
+	called := option.called
+	for i := 0; i < len(called); i++ {
+		task, exist := document.Tasks[called[i]]
 
 		if !exist {
 			logger.Error(fmt.Sprintf("cannot found task '%s'", option.called[i]))
 		}
+
+		if _, exist := executeTasks[called[i]]; exist {
+			continue
+		}
+
+		executeTasks[called[i]] = struct{}{}
+		called = append(called, task.DependTasks...)
+	}
+
+	for i := range called {
+		task := document.Tasks[called[i]]
 
 		for j := range task.Scripts {
 
