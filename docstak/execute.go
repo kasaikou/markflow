@@ -150,6 +150,14 @@ func executeTasks(ctx context.Context, document model.Document, option *executeO
 			}
 
 			ended := 0
+
+			if len(task.Scripts) == 0 {
+				chRes <- taskResp{
+					Call: task.Call,
+					Exit: 0,
+				}
+			}
+
 			for ended < len(task.Scripts) {
 				select {
 				case <-ctx.Done():
