@@ -76,7 +76,7 @@ func ExecuteContext(ctx context.Context, document model.Document, options ...Exe
 		task, exist := document.Tasks[called[i]]
 
 		if !exist {
-			logger.Error(fmt.Sprintf("cannot found task '%s'", option.called[i]))
+			logger.Error(fmt.Sprintf("cannot found task '%s'", called[i]))
 		}
 
 		if _, exist := execTasks[called[i]]; exist {
