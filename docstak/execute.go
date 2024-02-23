@@ -109,11 +109,6 @@ func executeTasks(ctx context.Context, document model.Document, option *executeO
 	var cancel func()
 	ctx, cancel = context.WithCancel(ctx)
 	taskChs := make([]chan taskResp, 0, len(executeTasks))
-	defer func() {
-		for i := range taskChs {
-			close(taskChs[i])
-		}
-	}()
 
 	for i := range executeTasks {
 		ch := make(chan taskResp, len(executeTasks))
