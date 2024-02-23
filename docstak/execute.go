@@ -22,6 +22,7 @@ import (
 	"log/slog"
 	"os"
 	"runtime"
+	"sync"
 
 	"github.com/kasaikou/docstak/docstak/model"
 	"github.com/kasaikou/docstak/docstak/srun"
@@ -69,7 +70,7 @@ func ExecuteContext(ctx context.Context, document model.Document, options ...Exe
 		}
 	}
 
-	executeTasks := map[string]struct{}{}
+	execTasks := map[string]struct{}{}
 	called := option.called
 	for i := 0; i < len(called); i++ {
 		task, exist := document.Tasks[called[i]]
@@ -78,40 +79,143 @@ func ExecuteContext(ctx context.Context, document model.Document, options ...Exe
 			logger.Error(fmt.Sprintf("cannot found task '%s'", option.called[i]))
 		}
 
-		if _, exist := executeTasks[called[i]]; exist {
+		if _, exist := execTasks[called[i]]; exist {
 			continue
 		}
 
-		executeTasks[called[i]] = struct{}{}
+		execTasks[called[i]] = struct{}{}
 		called = append(called, task.DependTasks...)
 	}
 
-	for i := range called {
-		task := document.Tasks[called[i]]
+	tasks := make([]string, 0, len(execTasks))
+	for task := range execTasks {
+		tasks = append(tasks, task)
+	}
 
-		for j := range task.Scripts {
+	return executeTasks(ctx, document, option, tasks)
+}
 
-			runner := srun.NewScriptRunner(task.Scripts[j].Config.ExecPath, task.Scripts[j].Config.CmdOpt, task.Scripts[j].Script, task.Scripts[j].Config.Args...)
+func executeTasks(ctx context.Context, document model.Document, option *executeOptions, executeTasks []string) int {
+	wg := sync.WaitGroup{}
+	defer wg.Wait()
 
-			for key, value := range task.Envs {
-				runner.SetEnv(key, value)
+	type taskResp struct {
+		Call string
+		Exit int
+	}
+
+	chTaskResp := make(chan taskResp)
+	defer close(chTaskResp)
+	var cancel func()
+	ctx, cancel = context.WithCancel(ctx)
+	taskChs := make([]chan taskResp, 0, len(executeTasks))
+	defer func() {
+		for i := range taskChs {
+			close(taskChs[i])
+		}
+	}()
+
+	for i := range executeTasks {
+		ch := make(chan taskResp)
+		task := document.Tasks[executeTasks[i]]
+
+		go func(ctx context.Context, task model.DocumentTask, chEnded <-chan taskResp, chRes chan<- taskResp) {
+			defer wg.Done()
+
+			depends := map[string]struct{}{}
+			for i := range task.DependTasks {
+				depends[task.DependTasks[i]] = struct{}{}
 			}
 
-			environ := os.Environ()
-			for i := range environ {
-				runner.SetEnviron(environ[i])
+			for len(depends) > 0 {
+				select {
+				case <-ctx.Done():
+					return
+				case res := <-chEnded:
+					delete(depends, res.Call)
+				}
 			}
 
-			logger.Info("task start", slog.String("task", task.Call))
-			exit, err := option.onExec(ctx, task, runner)
-			logger.Info("task ended", slog.String("task", task.Call), slog.Int("exitCode", exit))
+			ch := make(chan taskResp)
+			wg := sync.WaitGroup{}
+			defer wg.Wait()
+			for j := range task.Scripts {
+				wg.Add(1)
+				go func(ctx context.Context, task model.DocumentTask, script model.DocumentTaskScript, chRes chan<- taskResp) {
+					defer wg.Done()
+					exit := executeTask(ctx, task, script, option)
+					chRes <- taskResp{
+						Call: task.Call,
+						Exit: exit,
+					}
 
-			if err != nil {
-				logger.Error("task ended with error", slog.String("task", task.Call), slog.Any("error", err))
-				return -1
+				}(ctx, task, task.Scripts[j], ch)
+			}
+
+			ended := 0
+			for {
+				select {
+				case <-ctx.Done():
+					return
+				case result := <-ch:
+					ended++
+					if ended >= len(task.Scripts) {
+						chRes <- result
+					} else if result.Exit != 0 {
+						chRes <- result
+					}
+				}
+			}
+
+		}(ctx, task, ch, chTaskResp)
+
+		taskChs = append(taskChs, ch)
+	}
+	ended := 0
+	for {
+		select {
+		case <-ctx.Done():
+			return -1
+		case res := <-chTaskResp:
+			if res.Exit != 0 {
+				cancel()
+				return res.Exit
+			}
+
+			ended++
+			if ended >= len(executeTasks) {
+				return 0
+			}
+
+			for i := range taskChs {
+				taskChs[i] <- res
 			}
 		}
 	}
+}
 
-	return 0
+func executeTask(ctx context.Context, task model.DocumentTask, script model.DocumentTaskScript, option *executeOptions) int {
+	logger := GetLogger(ctx)
+
+	runner := srun.NewScriptRunner(script.Config.ExecPath, script.Config.CmdOpt, script.Script, script.Config.Args...)
+
+	for key, value := range task.Envs {
+		runner.SetEnv(key, value)
+	}
+
+	environ := os.Environ()
+	for i := range environ {
+		runner.SetEnviron(environ[i])
+	}
+
+	logger.Info("task start", slog.String("task", task.Call))
+	exit, err := option.onExec(ctx, task, runner)
+	logger.Info("task ended", slog.String("task", task.Call), slog.Int("exitCode", exit))
+
+	if err != nil {
+		logger.Error("task ended with error", slog.String("task", task.Call), slog.Any("error", err))
+		return -1
+	}
+
+	return exit
 }
