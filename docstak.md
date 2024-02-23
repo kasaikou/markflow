@@ -61,26 +61,14 @@ go mod tidy && git diff --no-patch --exit-code go.sum
 gofmt -l .
 ```
 
-## ci/test
+## ci/coverage-test
 
 ```yaml:docstak.yml
-previous: [ci/test/go]
+previous: [ci/coverage-test/go]
 ```
 
-## ci/test/go
+## ci/coverage-test/go
 
 ```sh
 go test -coverprofile=coverage.txt -covermode=atomic ./...
-```
-
-## ci/test/send-coverage
-
-Send to Codecov's coverage report.
-
-```yaml:docstak.yml
-previous: [ci/test/go]
-```
-
-```sh
-codecov upload-process -f coverage.txt -t ${CODECOV_TOKEN}
 ```

@@ -1,6 +1,6 @@
 on:
   pull_request:
-    paths: 
+    paths:
       - "**.go"
       - go.mod
       - go.sum
@@ -19,6 +19,9 @@ jobs:
             go.sum
       - name: docstak/install
         run: go install ./cmd/docstak
-      - name: docstak/ci-lint
-        run: docstak ci-lint-test
-      
+      - name: docstak/ci
+        run: docstak ci
+      - uses: codecov/codecov-action@v4.0.1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: kasaikou/docstak
