@@ -49,11 +49,11 @@ type ParseResultGlobalConfig struct {
 }
 
 type ParseResultTask struct {
-	Title       string
-	Description string
-	Config      ParseResultTaskConfig
-	Commands    []ParseResultCommand
-	Internals   []ParseResultTask
+	Title        string
+	HeadingLavel int
+	Description  string
+	Config       ParseResultTaskConfig
+	Commands     []ParseResultCommand
 }
 
 type ParseResultTaskConfig struct {
@@ -114,33 +114,8 @@ func ParseMarkdown(ctx context.Context, markdown MarkdownOption) (ParseResult, e
 		panic(fmt.Sprintf("unexpected node kind (want: %v, have: %v)", ast.KindDocument, node.Kind()))
 	}
 
-	topHeaderLevel := 0
-	selectedElemIdx := -1
-	selectedElem := []int{}
+	baseHeading := -1
 	var selected *ParseResultTask
-	getSelected := func() *ParseResultTask {
-		if len(selectedElem) == 0 {
-			return nil
-		}
-
-		if selectedElem[0] == len(result.Tasks) {
-			result.Tasks = append(result.Tasks, ParseResultTask{})
-		} else if selectedElem[0] > len(result.Tasks) {
-			panic("jumped element index")
-		}
-
-		result := &result.Tasks[selectedElem[0]]
-		for i := 1; i < selectedElemIdx; i++ {
-			if selectedElem[i] > len(result.Internals) {
-				panic("jumped element index")
-			} else if selectedElem[i] == len(result.Internals) {
-				result.Internals = append(result.Internals, ParseResultTask{})
-			}
-			result = &result.Internals[selectedElem[i]]
-		}
-
-		return result
-	}
 
 	for node := node.FirstChild(); node != nil; node = node.NextSibling() {
 		switch node.Kind() {
@@ -148,32 +123,14 @@ func ParseMarkdown(ctx context.Context, markdown MarkdownOption) (ParseResult, e
 			node := node.(*ast.Heading)
 			title := node.Text(markdown.bytes)
 			titleStr := unsafe.String(unsafe.SliceData(title), len(title))
-			if topHeaderLevel < 1 {
-				topHeaderLevel = node.Level
-				result.Title = titleStr
-
-			} else { // topHeaderLevel >= 1 (title has been already defined)
-				if node.Level <= topHeaderLevel {
-					return result, errors.Errorf("markdown has multiple document title ('%s' and '%s')", result.Title, string(node.Text(markdown.bytes)))
-				}
-
-				elemLevel := node.Level - topHeaderLevel
-				if elemLevel > len(selectedElem) {
-					if want := len(selectedElem) + 1; elemLevel > want {
-						return result, errors.Errorf("jumped header level (want: %d, have: %d) with text '%s'", want, elemLevel, string(node.Text(markdown.bytes)))
-					}
-
-					selectedElem = append(selectedElem, 0)
-					selectedElemIdx = elemLevel - 1
-
-				} else { // elemLevel <= len(selectedElem)
-					selectedElemIdx = elemLevel - 1
-					selectedElem[selectedElemIdx]++
-				}
-
-				selected = getSelected()
-				selected.Title = titleStr
+			if baseHeading < 0 {
+				baseHeading = node.Level - 1
 			}
+			result.Tasks = append(result.Tasks, ParseResultTask{
+				Title:        titleStr,
+				HeadingLavel: node.Level,
+			})
+			selected = &result.Tasks[len(result.Tasks)-1]
 
 		case ast.KindParagraph:
 			node := node.(*ast.Paragraph)
@@ -229,6 +186,17 @@ func ParseMarkdown(ctx context.Context, markdown MarkdownOption) (ParseResult, e
 						Code: codeStr,
 					})
 				}
+			}
+		}
+	}
+
+	if len(result.Tasks) > 0 {
+		if len(result.Tasks[0].Commands) == 0 {
+			result.Title = result.Tasks[0].Title
+			if result.Description == "" {
+				result.Description = result.Tasks[0].Description
+			} else {
+				result.Description = result.Description + "\n\n" + result.Tasks[0].Description
 			}
 		}
 	}

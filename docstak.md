@@ -49,25 +49,25 @@ Running on GitHub Actions, local, and so on.
 previous: [ci/fmt, ci/depends, ci/coverage-test]
 ```
 
-## ci/depends
+### ci/depends
 
 ```sh
 go mod tidy && git diff --no-patch --exit-code go.sum
 ```
 
-## ci/fmt
+### ci/fmt
 
 ```sh
 gofmt -l .
 ```
 
-## ci/coverage-test
+### ci/coverage-test
 
 ```yaml:docstak.yml
 previous: [ci/coverage-test/go]
 ```
 
-## ci/coverage-test/go
+#### ci/coverage-test/go
 
 ```sh
 go test -coverprofile=coverage.txt -covermode=atomic ./...
