@@ -14,7 +14,11 @@ Download dependencies
 
 ```yaml:docstak.yml
 requires:
-  exist: ["go.mod", "go.sum"]
+  file:
+    exist: ["go.mod", "go.sum"]
+skips:
+  file:
+    exist: ["go.sum"]
 ```
 
 ```sh

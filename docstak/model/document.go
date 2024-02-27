@@ -60,6 +60,7 @@ type DocumentTask struct {
 }
 
 type TaskSkipCondition struct {
+	ExistPaths []string
 }
 
 type TaskRequireCondition struct {

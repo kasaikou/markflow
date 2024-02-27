@@ -66,7 +66,13 @@ func (r *Requires) Test(ctx context.Context, opts TestOption) (sufficient bool) 
 
 			if err != nil {
 				if err == doublestar.ErrPatternNotExist {
-					enable = false
+					logFns = append(logFns, func() {
+						logger.Error("cannot found files matched with patterns",
+							slog.String("pattern", strings.Join(r.container[itemIdx].existFiles[ruleIdx].Config.Rules, " | ")),
+						)
+					})
+					valid = false
+
 				} else {
 					logger.Warn("returns error when check file is exist (check glob pattern is valid or not)", slog.Any("error", err))
 					logFns = append(logFns, func() {
