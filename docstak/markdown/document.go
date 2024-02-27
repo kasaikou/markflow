@@ -66,7 +66,7 @@ func setDocumentTask(ctx context.Context, document *model.DocumentConfig, result
 		config.Envs[key] = value
 	}
 
-	config.Requires.ExistPaths = result.Config.Requires.Exists
+	config.Requires.ExistPaths = result.Config.Requires.File.Exists
 
 	for i := range result.Commands {
 		execConfig, exist := document.ExecPathResolver[result.Commands[i].Lang]

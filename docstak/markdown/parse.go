@@ -69,10 +69,14 @@ type ParseResultTaskConfigEnvs struct {
 }
 
 type ParseResultTaskConfigSkips struct {
-	Exists []string `json:"exist" yaml:"exist"`
+	File ParseResultTaskConfigFiles `json:"file" yaml:"file"`
 }
 
 type ParseResultTaskConfigRequires struct {
+	File ParseResultTaskConfigFiles `json:"file" yaml:"file"`
+}
+
+type ParseResultTaskConfigFiles struct {
 	Exists []string `json:"exist" yaml:"exist"`
 }
 
