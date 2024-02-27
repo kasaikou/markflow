@@ -16,6 +16,9 @@ Download dependencies
 requires:
   file:
     exist: ["go.mod", "go.sum"]
+skips:
+  file:
+    exist: ["go.sum"]
 ```
 
 ```sh

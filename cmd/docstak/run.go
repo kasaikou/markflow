@@ -61,6 +61,12 @@ func run() int {
 				chDecoration <- decoration
 			}()
 
+			skip := condition.NewSkipsFromDocumentTask(&task).Test(ctx, condition.TestOption{})
+			if skip {
+				logger.Info("task execute is not required", slog.String("task", task.Call))
+				return 0, nil
+			}
+
 			sufficient := condition.NewRequiresFromDocumentTask(&task).Test(ctx, condition.TestOption{})
 			if !sufficient {
 				logger.Error("task's require rules are insufficient", slog.String("task", task.Call))
