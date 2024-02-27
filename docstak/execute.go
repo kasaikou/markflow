@@ -213,9 +213,7 @@ func executeTask(ctx context.Context, task model.DocumentTask, script model.Docu
 		runner.SetEnviron(environ[i])
 	}
 
-	logger.Info("task start", slog.String("task", task.Call))
 	exit, err := option.onExec(ctx, task, runner)
-	logger.Info("task ended", slog.String("task", task.Call), slog.Int("exitCode", exit))
 
 	if err != nil {
 		logger.Error("task ended with error", slog.String("task", task.Call), slog.Any("error", err))

@@ -87,7 +87,11 @@ func run() int {
 				stderrScanner.Scan(stderr)
 			}()
 
-			return runner.RunContext(ctx)
+			logger.Info("task start", slog.String("task", task.Call))
+			exit, err := runner.RunContext(ctx)
+			logger.Info("task ended", slog.String("task", task.Call), slog.Int("exitCode", exit))
+
+			return exit, err
 		}),
 	)
 }
