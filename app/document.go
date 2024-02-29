@@ -23,7 +23,7 @@ import (
 	"path/filepath"
 
 	"github.com/kasaikou/docstak/docstak"
-	"github.com/kasaikou/docstak/docstak/markdown"
+	"github.com/kasaikou/docstak/docstak/files/markdown"
 	"github.com/kasaikou/docstak/docstak/model"
 	"github.com/kasaikou/docstak/docstak/resolver"
 )
