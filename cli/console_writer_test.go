@@ -24,6 +24,8 @@ import (
 	"sync"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestConsoleWriterLF(t *testing.T) {
@@ -67,7 +69,7 @@ func TestConsoleWriterCR(t *testing.T) {
 	wg := sync.WaitGroup{}
 	defer wg.Wait()
 
-	cw, _ := NewConsoleWriter(os.Stdout)
+	cw, _ := NewConsoleWriter(os.Stdout, LimitedWidth(50))
 	defer cw.Close()
 
 	wg.Add(1)
@@ -84,19 +86,48 @@ func TestConsoleWriterCR(t *testing.T) {
 		go func(ch chan<- ConsoleRecord, record ConsoleRecord) {
 			defer taskWg.Done()
 			for i := 0; i < 100; i++ {
-				record.Text = strings.Repeat("a", rand.Intn(200))
+				record.Text = strings.Repeat("\t0123456789", rand.Intn(20))
 				ch <- record
 				time.Sleep(10 * time.Millisecond)
 			}
 
 		}(cw.chRecord, ConsoleRecord{
 			sender:     &taskWg,
-			RecordMode: RecordModeCR,
+			RecordMode: RecordModeLF,
 			Kind:       "TEST",
 			Label:      fmt.Sprintf("TEST_%d", i),
 			LabelDecoration: Decoration{
 				Background: fmt.Sprintf("\033[3%dm", i%8),
 			},
 		})
+	}
+}
+
+func TestFirstLineWithWidthIndex(t *testing.T) {
+
+	tests := []struct {
+		Text          string
+		Width, Except int
+	}{
+		{
+			Text:   "\taaa",
+			Width:  16,
+			Except: 4,
+		},
+		{
+			Text:   "aaaaaaaaaa\taaaaaaaaaaaaa",
+			Width:  20,
+			Except: 15,
+		},
+		{
+			Text:   "aaaaaaaaaaaaaaaaaaaaaaaaaa\taaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\taaaaaaaaaaaaaaaaa",
+			Width:  79,
+			Except: 68,
+		},
+	}
+
+	for _, test := range tests {
+		idx := firstLineWithWidthIndex(test.Text, test.Width, 0)
+		assert.Equal(t, test.Except, idx, fmt.Sprintf("text: '%s'", test.Text[:idx]))
 	}
 }
