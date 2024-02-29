@@ -33,7 +33,7 @@ import (
 func run() int {
 	cwWaiter := sync.WaitGroup{}
 	defer cwWaiter.Wait()
-	cw, _ := cli.NewConsoleWriter(os.Stdout)
+	cw, _ := cli.NewConsoleWriter(os.Stdout, cli.TerminalAutoDetect())
 	cwWaiter.Add(1)
 	go func() {
 		defer cwWaiter.Done()

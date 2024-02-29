@@ -18,9 +18,12 @@ package cli
 
 import (
 	"bytes"
+	"fmt"
 	"io"
+	"os"
 
 	"github.com/mattn/go-runewidth"
+	"golang.org/x/term"
 )
 
 type RecordMode byte
@@ -31,14 +34,21 @@ const (
 	RecordModeCR RecordMode = '\r'
 )
 
-func firstLineWithWidthIndex(text string, width int) (idx int) {
+func firstLineWithWidthIndex(text string, width int, prefix int) (idx int) {
 	countWidth := 0
+
 	for i, r := range text {
-		w := runewidth.RuneWidth(r)
+		var w int
+		switch r {
+		case '\t':
+			w = 8 - ((countWidth + prefix) % 8)
+		default:
+			w = runewidth.RuneWidth(r)
+		}
+
 		if countWidth+w > width {
 			return i
 		}
-
 		countWidth += w
 	}
 
@@ -70,47 +80,101 @@ func (cr *ConsoleRecord) AppendBytes(src []byte, width int) []byte {
 
 	text := cr.Text
 	decoration := cr.TextDecoration
+	if width > 0 {
 
-	prefixBeginAt := len(src)
-	src = cr.LabelDecoration.AppendBytes(src)
-	src = append(src, cr.Kind...)
-	src = append(src, appendBytesSpaces[:KindWidth-len(cr.Kind)]...)
-	src = append(src, cr.Label...)
-	src = append(src, appendBytesSpaces[:LabelWidth-len(cr.Label)]...)
-	prefixEndAt := len(src)
-	prefix := src[prefixBeginAt:prefixEndAt]
-	src = cr.TextDecoration.AppendBytes(src)
+		prefixBeginAt := len(src)
+		src = cr.LabelDecoration.AppendBytes(src)
+		src = append(src, cr.Kind...)
+		src = append(src, appendBytesSpaces[:KindWidth-len(cr.Kind)]...)
+		src = append(src, cr.Label...)
+		src = append(src, appendBytesSpaces[:LabelWidth-len(cr.Label)]...)
+		prefixEndAt := len(src)
 
-	for {
-		if idx := firstLineWithWidthIndex(text, width-PrefixWidth); idx == len(text) {
-			src = append(src, text...)
-			return src
-		} else {
-			src = append(src, text[:idx]...)
-			decoration = decoration.PushString((text[:idx]))
-			text = text[idx:]
-			src = append(src, '\n')
-			src = append(src, prefix...)
-			src = decoration.AppendBytes(src)
+		prefix := src[prefixBeginAt:prefixEndAt]
+		src = cr.TextDecoration.AppendBytes(src)
+
+		for {
+			if idx := firstLineWithWidthIndex(text, width-PrefixWidth, PrefixWidth); idx == len(text) {
+				src = append(src, text...)
+				return src
+			} else {
+				src = append(src, text[:idx]...)
+				decoration = decoration.PushString((text[:idx]))
+				text = text[idx:]
+				src = append(src, '\n')
+				src = append(src, prefix...)
+				src = decoration.AppendBytes(src)
+			}
 		}
+
+	} else {
+		src = cr.LabelDecoration.AppendBytes(src)
+		src = append(src, cr.Kind...)
+		src = append(src, appendBytesSpaces[:KindWidth-len(cr.Kind)]...)
+		src = append(src, cr.Label...)
+		src = append(src, appendBytesSpaces[:LabelWidth-len(cr.Label)]...)
+
+		src = cr.TextDecoration.AppendBytes(src)
+		src = append(src, text...)
+		return src
 	}
 }
 
 type ConsoleWriter struct {
-	_            struct{}
-	defaultWidth int
-	chRecord     chan ConsoleRecord
-	dest         io.Writer
+	_        struct{}
+	chRecord chan ConsoleRecord
+	dest     io.Writer
+	getWidth func() int
 }
 
 type LoggerOption func(*ConsoleWriter) error
 
+func LimitedWidth(width int) LoggerOption {
+	return func(cw *ConsoleWriter) error {
+		cw.getWidth = func() int {
+			return width
+		}
+		return nil
+	}
+}
+
+func UnlimitedWidth() LoggerOption {
+	return func(cw *ConsoleWriter) error {
+		cw.getWidth = func() int { return 0 }
+		return nil
+	}
+}
+
+func TerminalWidth() LoggerOption {
+	fd := os.Stdout.Fd()
+	return func(cw *ConsoleWriter) error {
+		cw.getWidth = func() int {
+			width, _, err := term.GetSize(int(fd))
+			if err != nil {
+				panic(err)
+			}
+
+			return width
+		}
+		return nil
+	}
+}
+
+func TerminalAutoDetect() LoggerOption {
+	if term.IsTerminal(int(os.Stdout.Fd())) {
+		fmt.Println("terminal mode")
+		return TerminalWidth()
+	} else {
+		return UnlimitedWidth()
+	}
+}
+
 func NewConsoleWriter(dest io.Writer, options ...LoggerOption) (*ConsoleWriter, error) {
 
 	logger := ConsoleWriter{
-		dest:         dest,
-		defaultWidth: 128,
-		chRecord:     make(chan ConsoleRecord),
+		dest:     dest,
+		chRecord: make(chan ConsoleRecord),
+		getWidth: func() int { return 0 },
 	}
 
 	for i := range options {
@@ -130,7 +194,6 @@ func (cw *ConsoleWriter) Close() error {
 func (cw *ConsoleWriter) Route() {
 	func(dest io.Writer, chRecord <-chan ConsoleRecord) {
 
-		width := cw.defaultWidth
 		lfbytes := []byte{'\n'}
 
 		prevCountLF := 0
@@ -154,6 +217,8 @@ func (cw *ConsoleWriter) Route() {
 					return
 				}
 
+				width := cw.getWidth()
+
 				switch prev.RecordMode {
 				case RecordModeNA:
 					buffer = record.AppendBytes(buffer, width)
@@ -173,7 +238,7 @@ func (cw *ConsoleWriter) Route() {
 							buffer = append(buffer, "\033[1A\033[K"...)
 						}
 						buffer = append(buffer, "\033[K"...)
-						prev.TextDecoration = Decoration{}
+						prev.TextDecoration = Decoration{} // plain text
 						prev.Text = "(strip output with CR by docstak)"
 						buffer = prev.AppendBytes(buffer, width)
 						buffer = append(buffer, '\n')
