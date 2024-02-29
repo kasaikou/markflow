@@ -97,10 +97,10 @@ func (cr *ConsoleRecord) AppendBytes(src []byte, width int) []byte {
 }
 
 type ConsoleWriter struct {
-	_            struct{}
-	defaultWidth int
-	chRecord     chan ConsoleRecord
-	dest         io.Writer
+	_        struct{}
+	chRecord chan ConsoleRecord
+	dest     io.Writer
+	getWidth func() int
 }
 
 type LoggerOption func(*ConsoleWriter) error
@@ -108,9 +108,9 @@ type LoggerOption func(*ConsoleWriter) error
 func NewConsoleWriter(dest io.Writer, options ...LoggerOption) (*ConsoleWriter, error) {
 
 	logger := ConsoleWriter{
-		dest:         dest,
-		defaultWidth: 128,
-		chRecord:     make(chan ConsoleRecord),
+		dest:     dest,
+		chRecord: make(chan ConsoleRecord),
+		getWidth: func() int { return 128 },
 	}
 
 	for i := range options {
@@ -130,7 +130,6 @@ func (cw *ConsoleWriter) Close() error {
 func (cw *ConsoleWriter) Route() {
 	func(dest io.Writer, chRecord <-chan ConsoleRecord) {
 
-		width := cw.defaultWidth
 		lfbytes := []byte{'\n'}
 
 		prevCountLF := 0
@@ -154,6 +153,8 @@ func (cw *ConsoleWriter) Route() {
 					return
 				}
 
+				width := cw.getWidth()
+
 				switch prev.RecordMode {
 				case RecordModeNA:
 					buffer = record.AppendBytes(buffer, width)
@@ -173,7 +174,7 @@ func (cw *ConsoleWriter) Route() {
 							buffer = append(buffer, "\033[1A\033[K"...)
 						}
 						buffer = append(buffer, "\033[K"...)
-						prev.TextDecoration = Decoration{}
+						prev.TextDecoration = Decoration{} // plain text
 						prev.Text = "(strip output with CR by docstak)"
 						buffer = prev.AppendBytes(buffer, width)
 						buffer = append(buffer, '\n')
