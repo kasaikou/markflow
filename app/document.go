@@ -23,7 +23,8 @@ import (
 	"path/filepath"
 
 	"github.com/kasaikou/docstak/docstak"
-	"github.com/kasaikou/docstak/docstak/markdown"
+	"github.com/kasaikou/docstak/docstak/files/markdown"
+	"github.com/kasaikou/docstak/docstak/files/statefile"
 	"github.com/kasaikou/docstak/docstak/model"
 	"github.com/kasaikou/docstak/docstak/resolver"
 )
@@ -43,7 +44,13 @@ type documentOpt struct {
 
 type DocumentOpt func(d *documentOpt)
 
-func NewDocument(ctx context.Context, opts ...DocumentOpt) (document model.Document, success bool) {
+type LocalDocument struct {
+	MarkdownFilename string
+	StateFilename    string
+	Document         model.Document
+}
+
+func NewLocalDocument(ctx context.Context, opts ...DocumentOpt) (document LocalDocument, success bool) {
 
 	logger := docstak.GetLogger(ctx)
 	wd, _ := os.Getwd()
@@ -68,10 +75,18 @@ func NewDocument(ctx context.Context, opts ...DocumentOpt) (document model.Docum
 		return document, false
 	}
 
-	document, err = model.NewDocument(ctx,
+	stateFilename := filepath.Join(filepath.Dir(po.Filename()), ".docstak_state.json")
+	state, err := statefile.FromLocalFile(stateFilename)
+	if err != nil {
+		logger.Error("cannot parse state", slog.String("filepath", po.Filename()), slog.Any("error", err))
+		return document, false
+	}
+
+	doc, err := model.NewDocument(ctx,
 		model.NewDocOptionRootDir(filepath.Dir(po.Filename())),
 		resolver.NewDocumentWithPathResolver(LanguageCmdPairs...),
 		markdown.NewDocFromMarkdownParsing(parsed),
+		statefile.SetStateParsed(state),
 	)
 
 	if err != nil {
@@ -79,5 +94,19 @@ func NewDocument(ctx context.Context, opts ...DocumentOpt) (document model.Docum
 		return document, false
 	}
 
-	return document, true
+	return LocalDocument{
+		MarkdownFilename: po.Filename(),
+		StateFilename:    stateFilename,
+		Document:         doc,
+	}, true
+}
+
+func (local *LocalDocument) SaveState(ctx context.Context) {
+	logger := docstak.GetLogger(ctx)
+	state := statefile.FromDocument(ctx, local.Document)
+	if state != nil {
+		if err := statefile.SaveLocalFile(local.StateFilename, *state); err != nil {
+			logger.Error("cannot save statefile", slog.String("filepath", local.StateFilename), slog.Any("error", err))
+		}
+	}
 }

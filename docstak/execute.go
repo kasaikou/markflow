@@ -124,6 +124,8 @@ func executeTasks(ctx context.Context, document model.Document, option *executeO
 				depends[task.DependTasks[i]] = struct{}{}
 			}
 
+			<-chEnded
+
 			for len(depends) > 0 {
 				select {
 				case <-ctx.Done():
@@ -177,6 +179,11 @@ func executeTasks(ctx context.Context, document model.Document, option *executeO
 		taskChs = append(taskChs, ch)
 	}
 	ended := 0
+
+	for i := range taskChs {
+		taskChs[i] <- taskResp{}
+	}
+
 	for {
 		select {
 		case <-ctx.Done():

@@ -18,7 +18,7 @@ requires:
     exist: ["go.mod", "go.sum"]
 skips:
   file:
-    exist: ["go.sum"]
+    not-changed: ["go.sum"]
 ```
 
 ```sh

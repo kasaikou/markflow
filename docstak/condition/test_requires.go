@@ -32,7 +32,8 @@ type Requires struct {
 }
 
 type testContainer struct {
-	existFiles []FileIsExisted
+	existFiles      []FileIsExisted
+	notChangedFiles []FileNotChanged
 }
 
 type TestOption struct{}

@@ -43,7 +43,7 @@ func run() int {
 
 	logger := slog.New(cw.NewLoggerHandler(nil))
 	ctx := docstak.WithLogger(context.Background(), logger)
-	document, success := app.NewDocument(ctx)
+	document, success := app.NewLocalDocument(ctx)
 	if !success {
 		return -1
 	}
@@ -53,7 +53,7 @@ func run() int {
 		chDecoration <- cli.ProcessOutputDecorations[i]
 	}
 
-	return docstak.ExecuteContext(ctx, document,
+	exit := docstak.ExecuteContext(ctx, document.Document,
 		docstak.ExecuteOptCalls(Cmds...),
 		docstak.ExecuteOptProcessExec(func(ctx context.Context, task model.DocumentTask, runner *srun.ScriptRunner) (int, error) {
 			decoration := <-chDecoration
@@ -61,8 +61,9 @@ func run() int {
 				chDecoration <- decoration
 			}()
 
-			skip := condition.NewSkipsFromDocumentTask(&task).Test(ctx, condition.TestOption{})
-			if skip {
+			skip := condition.NewSkipsFromDocumentTask(&task)
+			isSkip := skip.Test(ctx, condition.TestOption{})
+			if isSkip {
 				logger.Info("task execute is not required", slog.String("task", task.Call))
 				return 0, nil
 			}
@@ -97,7 +98,17 @@ func run() int {
 			exit, err := runner.RunContext(ctx)
 			logger.Info("task ended", slog.String("task", task.Call), slog.Int("exitCode", exit))
 
-			return exit, err
+			if err != nil {
+				return exit, err
+			}
+
+			skip.UpdateDocumentTask(ctx, &task)
+			document.Document.Tasks[task.Call] = task
+
+			return exit, nil
 		}),
 	)
+
+	document.SaveState(ctx)
+	return exit
 }
