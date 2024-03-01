@@ -1,3 +1,4 @@
 bin
 .env
 coverage.txt
+.docstak_state.json

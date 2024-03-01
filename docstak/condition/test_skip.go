@@ -42,6 +42,27 @@ func NewSkipsFromDocumentTask(dt *model.DocumentTask) *Skips {
 		})
 	}
 
+	for i := range dt.Skips.NotChangedPaths {
+		paths := make([]string, 0, len(dt.Skips.NotChangedPaths[i].Paths))
+		for k := range dt.Skips.NotChangedPaths[i].Paths {
+			paths = append(paths, k)
+		}
+
+		ignores := make([]string, 0, len(dt.Skips.NotChangedPaths[i].Ignores))
+		for k := range dt.Skips.NotChangedPaths[i].Ignores {
+			ignores = append(ignores, k)
+		}
+
+		container.notChangedFiles = append(container.notChangedFiles, FileNotChanged{
+			Config: resolver.FileGlobConfig{
+				Rootdir:    dt.Parent.Rootdir,
+				Rules:      paths,
+				IgnoreRule: ignores,
+			},
+			MD5: dt.Skips.NotChangedPaths[i].MD5,
+		})
+	}
+
 	skips.container = append(skips.container, container)
 	return skips
 }
@@ -51,10 +72,10 @@ func (s *Skips) Test(ctx context.Context, opts TestOption) (skip bool) {
 
 	for itemIdx := range s.container {
 		skip := true
+		isEmpty := true
 
-		if len(s.container[itemIdx].existFiles) == 0 {
-			skip = false
-		} else {
+		if len(s.container[itemIdx].existFiles) > 0 {
+			isEmpty = false
 			for ruleIdx := range s.container[itemIdx].existFiles {
 
 				enable, err := s.container[itemIdx].existFiles[ruleIdx].IsEnable(ctx)
@@ -71,10 +92,48 @@ func (s *Skips) Test(ctx context.Context, opts TestOption) (skip bool) {
 			}
 		}
 
+		if len(s.container[itemIdx].notChangedFiles) > 0 {
+			isEmpty = false
+			for ruleIdx := range s.container[itemIdx].notChangedFiles {
+
+				enable, err := s.container[itemIdx].notChangedFiles[ruleIdx].IsEnable(ctx)
+
+				if err != nil {
+					skip = false
+					if err != doublestar.ErrPatternNotExist {
+						logger.Warn("returns error when check file is exist (check glob pattern is valid or not)", slog.Any("error", err))
+					}
+
+				} else if !enable {
+					skip = false
+				}
+			}
+		}
+
+		if isEmpty {
+			skip = false
+		}
+
 		if skip {
 			return true
 		}
 	}
 
 	return false
+}
+
+func (s *Skips) UpdateDocumentTask(ctx context.Context, dt *model.DocumentTask) {
+	logger := docstak.GetLogger(ctx)
+
+	for itemIdx := range s.container {
+		for ruleIdx := range s.container[itemIdx].notChangedFiles {
+			hash, err := s.container[itemIdx].notChangedFiles[ruleIdx].CurrentMD5(ctx)
+			if err != nil {
+				logger.Warn("failed to calculate md5", slog.Any("error", err))
+			} else {
+				logger.Info("update skip when files not changed rule's hash", slog.String("call", dt.Call), slog.String("hash", hash))
+				dt.Skips.NotChangedPaths[ruleIdx].MD5 = hash
+			}
+		}
+	}
 }

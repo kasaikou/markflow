@@ -60,11 +60,38 @@ type DocumentTask struct {
 }
 
 type TaskSkipCondition struct {
-	ExistPaths []string
+	ExistPaths      []string
+	NotChangedPaths []TaskFileNotChangedCondition
 }
 
 type TaskRequireCondition struct {
 	ExistPaths []string
+}
+
+type TaskFileNotChangedCondition struct {
+	Paths   map[string]struct{}
+	Ignores map[string]struct{}
+	MD5     string
+}
+
+func (cond *TaskFileNotChangedCondition) IsEqualRule(paths []string, ignores []string) bool {
+	if len(cond.Paths) != len(paths) || len(cond.Ignores) != len(ignores) {
+		return false
+	}
+
+	for i := range paths {
+		if _, exist := cond.Paths[paths[i]]; !exist {
+			return false
+		}
+	}
+
+	for i := range ignores {
+		if _, exist := cond.Paths[ignores[i]]; !exist {
+			return false
+		}
+	}
+
+	return true
 }
 
 type DocumentTaskScript struct {

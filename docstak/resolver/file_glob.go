@@ -9,9 +9,9 @@ import (
 )
 
 type FileGlobConfig struct {
-	Rootdir    string
-	Rules      []string
-	IgnoreRule []string
+	Rootdir    string   `json:"root"`
+	Rules      []string `json:"rules"`
+	IgnoreRule []string `json:"ignores"`
 }
 
 func ResolveFileGlob(config FileGlobConfig) ([]string, error) {

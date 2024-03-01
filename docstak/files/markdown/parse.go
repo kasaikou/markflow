@@ -77,7 +77,8 @@ type ParseResultTaskConfigRequires struct {
 }
 
 type ParseResultTaskConfigFiles struct {
-	Exists []string `json:"exist" yaml:"exist"`
+	Exists      []string `json:"exist" yaml:"exist"`
+	NotChangeds []string `json:"not-changed" yaml:"not-changed"`
 }
 
 type ParseResultCommand struct {
