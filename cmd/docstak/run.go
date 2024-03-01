@@ -20,7 +20,9 @@ import (
 	"context"
 	"log/slog"
 	"os"
+	"os/signal"
 	"sync"
+	"syscall"
 
 	"github.com/kasaikou/docstak/app"
 	"github.com/kasaikou/docstak/cli"
@@ -52,6 +54,28 @@ func run() int {
 	for i := range cli.ProcessOutputDecorations {
 		chDecoration <- cli.ProcessOutputDecorations[i]
 	}
+
+	ctx, cancel := context.WithCancel(ctx)
+
+	sigWaiter := sync.WaitGroup{}
+	sigWaiter.Add(1)
+	go func() {
+		defer sigWaiter.Done()
+		sig := make(chan os.Signal, 1)
+		defer close(sig)
+
+		signal.Notify(sig, syscall.SIGHUP, syscall.SIGTERM, syscall.SIGINT)
+		select {
+		case <-ctx.Done():
+			return
+		case signal := <-sig:
+			logger.Warn("signal received, make graceful shutdown started", slog.String("signal", signal.String()))
+			cancel()
+			return
+		}
+	}()
+	defer sigWaiter.Wait()
+	defer cancel()
 
 	exit := docstak.ExecuteContext(ctx, document.Document,
 		docstak.ExecuteOptCalls(Cmds...),
