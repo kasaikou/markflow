@@ -97,7 +97,6 @@ func ExecuteContext(ctx context.Context, document model.Document, options ...Exe
 
 func executeTasks(ctx context.Context, document model.Document, option *executeOptions, executeTasks []string) int {
 	wg := sync.WaitGroup{}
-	defer wg.Wait()
 
 	type taskResp struct {
 		Call string
@@ -137,19 +136,22 @@ func executeTasks(ctx context.Context, document model.Document, option *executeO
 
 			ch := make(chan taskResp)
 			wg := sync.WaitGroup{}
-			defer wg.Wait()
 			for j := range task.Scripts {
 				wg.Add(1)
 				go func(ctx context.Context, task model.DocumentTask, script model.DocumentTaskScript, chRes chan<- taskResp) {
 					defer wg.Done()
 					exit := executeTask(ctx, task, script, option)
-					chRes <- taskResp{
-						Call: task.Call,
-						Exit: exit,
+
+					if ctx.Err() == nil {
+						chRes <- taskResp{
+							Call: task.Call,
+							Exit: exit,
+						}
 					}
 
 				}(ctx, task, task.Scripts[j], ch)
 			}
+			defer wg.Wait()
 
 			ended := 0
 
@@ -178,6 +180,7 @@ func executeTasks(ctx context.Context, document model.Document, option *executeO
 
 		taskChs = append(taskChs, ch)
 	}
+	defer wg.Wait()
 	ended := 0
 
 	for i := range taskChs {
