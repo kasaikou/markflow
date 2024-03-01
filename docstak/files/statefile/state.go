@@ -87,18 +87,19 @@ func SaveLocalFile(filename string, s State) error {
 func SetStateParsed(result State) model.NewDocumentOption {
 	return func(ctx context.Context, d *model.DocumentConfig) error {
 
-		for call, task := range result.Tasks {
-			config := d.Document.Tasks[call]
+		for call, taskStates := range result.Tasks {
+			config, exist := d.Document.Tasks[call]
 
-			for _, file := range task.Files {
-				for j := range config.Skips.NotChangedPaths {
-					if config.Skips.NotChangedPaths[j].IsEqualRule(file.Rule.Paths, file.Rule.Ignores) {
-						config.Skips.NotChangedPaths[j].MD5 = file.MD5
+			if exist {
+				for _, file := range taskStates.Files {
+					for j := range config.Skips.NotChangedPaths {
+						if config.Skips.NotChangedPaths[j].IsEqualRule(file.Rule.Paths, file.Rule.Ignores) {
+							config.Skips.NotChangedPaths[j].MD5 = file.MD5
+						}
 					}
 				}
+				d.Document.Tasks[call] = config
 			}
-
-			d.Document.Tasks[call] = config
 		}
 
 		return nil
