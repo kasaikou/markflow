@@ -69,11 +69,13 @@ func setDocumentTask(ctx context.Context, document *model.DocumentConfig, result
 	config.Requires.ExistPaths = result.Config.Requires.File.Exists
 
 	config.Skips.ExistPaths = result.Config.Skips.File.Exists
-	config.Skips.NotChangedPaths = append(config.Skips.NotChangedPaths, model.TaskFileNotChangedCondition{
-		Paths: map[string]struct{}{},
-	})
-	for i := range result.Config.Skips.File.NotChangeds {
-		config.Skips.NotChangedPaths[0].Paths[result.Config.Skips.File.NotChangeds[i]] = struct{}{}
+	if len(result.Config.Skips.File.NotChangeds) > 0 {
+		config.Skips.NotChangedPaths = append(config.Skips.NotChangedPaths, model.TaskFileNotChangedCondition{
+			Paths: map[string]struct{}{},
+		})
+		for i := range result.Config.Skips.File.NotChangeds {
+			config.Skips.NotChangedPaths[0].Paths[result.Config.Skips.File.NotChangeds[i]] = struct{}{}
+		}
 	}
 
 	for i := range result.Commands {

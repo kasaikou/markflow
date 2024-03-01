@@ -55,6 +55,12 @@ previous: [ci/fmt, ci/depends, ci/coverage-test]
 
 ### ci/depends
 
+```yaml:docstak.yml
+skips:
+  file:
+    not-changed: ["**.go", "go.sum", "go.mod"]
+```
+
 ```sh
 go mod tidy && git diff --no-patch --exit-code go.sum
 ```
@@ -68,10 +74,16 @@ gofmt -l .
 ### ci/coverage-test
 
 ```yaml:docstak.yml
-previous: [ci/coverage-test/go]
+previous: [ci/coverage-test/go, download]
 ```
 
 #### ci/coverage-test/go
+
+```yaml:docstak.yml
+skips:
+  file:
+    not-changed: ["**.go", "go.sum", "go.mod"]
+```
 
 ```sh
 go test -coverprofile=coverage.txt -covermode=atomic ./...
