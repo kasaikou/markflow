@@ -160,8 +160,8 @@ func TerminalWidth() LoggerOption {
 	}
 }
 
-func TerminalAutoDetect() LoggerOption {
-	if term.IsTerminal(int(os.Stdout.Fd())) {
+func TerminalAutoDetect(file *os.File) LoggerOption {
+	if term.IsTerminal(int(file.Fd())) {
 		fmt.Println("terminal mode")
 		return TerminalWidth()
 	} else {

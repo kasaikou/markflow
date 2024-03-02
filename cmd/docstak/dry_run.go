@@ -16,8 +16,30 @@ limitations under the License.
 
 package main
 
-import "os"
+import (
+	"context"
+	"encoding/json"
+	"log/slog"
+	"os"
 
-func main() {
-	os.Exit(entrypoint(parseArgs()))
+	"github.com/kasaikou/docstak/app"
+	"github.com/kasaikou/docstak/docstak"
+)
+
+func dryrun(ctx context.Context, args parseArgResult) int {
+	logger := docstak.GetLogger(ctx)
+
+	document, success := app.NewLocalDocument(ctx)
+	if !success {
+		return -1
+	}
+
+	encoder := json.NewEncoder(os.Stdout)
+	encoder.SetIndent("", "  ")
+	if err := encoder.Encode(document); err != nil {
+		logger.Error("cannot encode to json", slog.Any("error", err))
+		return -1
+	}
+
+	return 0
 }
