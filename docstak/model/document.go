@@ -18,6 +18,7 @@ package model
 
 import (
 	"context"
+	"encoding/json"
 	"path/filepath"
 	"strings"
 
@@ -48,7 +49,7 @@ type Condition interface {
 }
 
 type DocumentTask struct {
-	Parent      *Document
+	Parent      *Document `json:"-"`
 	Title       string
 	Call        string
 	Description string
@@ -68,10 +69,22 @@ type TaskRequireCondition struct {
 	ExistPaths []string
 }
 
+type setString map[string]struct{}
+
 type TaskFileNotChangedCondition struct {
-	Paths   map[string]struct{}
-	Ignores map[string]struct{}
+	Paths   setString
+	Ignores setString
 	MD5     string
+}
+
+func (t setString) MarshalJSON() ([]byte, error) {
+
+	keys := make([]string, 0, len(t))
+	for k := range t {
+		keys = append(keys, k)
+	}
+
+	return json.Marshal(keys)
 }
 
 func (cond *TaskFileNotChangedCondition) IsEqualRule(paths []string, ignores []string) bool {
