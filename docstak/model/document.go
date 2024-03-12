@@ -18,6 +18,7 @@ package model
 
 import (
 	"context"
+	"encoding/json"
 	"path/filepath"
 	"strings"
 
@@ -25,11 +26,11 @@ import (
 )
 
 type Document struct {
-	Title       string
-	Description string
-	Rootdir     string
-	Tasks       map[string]DocumentTask
-	GlobalEnvs  map[string]string
+	Title       string                  `json:"title,omitempty"`
+	Description string                  `json:"description,omitempty"`
+	Rootdir     string                  `json:"rootdir"`
+	Tasks       map[string]DocumentTask `json:"tasks,omitempty"`
+	GlobalEnvs  map[string]string       `json:"global_envs,omitempty"`
 }
 
 type DocumentConfig struct {
@@ -38,9 +39,9 @@ type DocumentConfig struct {
 }
 
 type ExecConfig struct {
-	ExecPath string
-	CmdOpt   string
-	Args     []string
+	ExecPath string   `json:"exec_path"`
+	CmdOpt   string   `json:"cmd_opt,omitempty"`
+	Args     []string `json:"args,omitempty"`
 }
 
 type Condition interface {
@@ -48,30 +49,42 @@ type Condition interface {
 }
 
 type DocumentTask struct {
-	Parent      *Document
-	Title       string
-	Call        string
-	Description string
-	Scripts     []DocumentTaskScript
-	Envs        map[string]string
-	Skips       TaskSkipCondition
-	Requires    TaskRequireCondition
-	DependTasks []string
+	Parent      *Document            `json:"-"`
+	Title       string               `json:"omitempty"`
+	Call        string               `json:"call"`
+	Description string               `json:"description,omitempty"`
+	Scripts     []DocumentTaskScript `json:"scripts"`
+	Envs        map[string]string    `json:"envs,omitempty"`
+	Skips       TaskSkipCondition    `json:"skips,omitempty"`
+	Requires    TaskRequireCondition `json:"requires,omitempty"`
+	DependTasks []string             `json:"depend_tasks,omitempty"`
 }
 
 type TaskSkipCondition struct {
-	ExistPaths      []string
-	NotChangedPaths []TaskFileNotChangedCondition
+	ExistPaths      []string                      `json:"exist_paths,omitempty"`
+	NotChangedPaths []TaskFileNotChangedCondition `json:"not_changed_paths,omitempty"`
 }
 
 type TaskRequireCondition struct {
-	ExistPaths []string
+	ExistPaths []string `json:"exist_paths,omitempty"`
 }
 
+type setString map[string]struct{}
+
 type TaskFileNotChangedCondition struct {
-	Paths   map[string]struct{}
-	Ignores map[string]struct{}
-	MD5     string
+	Paths   setString `json:"paths,omitempty"`
+	Ignores setString `json:"ignores,omitempty"`
+	MD5     string    `json:"md5,omitempty"`
+}
+
+func (t setString) MarshalJSON() ([]byte, error) {
+
+	keys := make([]string, 0, len(t))
+	for k := range t {
+		keys = append(keys, k)
+	}
+
+	return json.Marshal(keys)
 }
 
 func (cond *TaskFileNotChangedCondition) IsEqualRule(paths []string, ignores []string) bool {

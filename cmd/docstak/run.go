@@ -32,10 +32,10 @@ import (
 	"github.com/kasaikou/docstak/docstak/srun"
 )
 
-func run() int {
+func run(ctx context.Context, args parseArgResult) int {
 	cwWaiter := sync.WaitGroup{}
 	defer cwWaiter.Wait()
-	cw, _ := cli.NewConsoleWriter(os.Stdout, cli.TerminalAutoDetect())
+	cw, _ := cli.NewConsoleWriter(os.Stdout, cli.TerminalAutoDetect(os.Stdout))
 	cwWaiter.Add(1)
 	go func() {
 		defer cwWaiter.Done()
@@ -44,7 +44,7 @@ func run() int {
 	defer cw.Close()
 
 	logger := slog.New(cw.NewLoggerHandler(nil))
-	ctx := docstak.WithLogger(context.Background(), logger)
+	ctx = docstak.WithLogger(ctx, logger)
 	document, success := app.NewLocalDocument(ctx)
 	if !success {
 		return -1
@@ -78,7 +78,7 @@ func run() int {
 	defer cancel()
 
 	exit := docstak.ExecuteContext(ctx, document.Document,
-		docstak.ExecuteOptCalls(Cmds...),
+		docstak.ExecuteOptCalls(args.Cmds...),
 		docstak.ExecuteOptProcessExec(func(ctx context.Context, task model.DocumentTask, runner *srun.ScriptRunner) (int, error) {
 			decoration := <-chDecoration
 			defer func() {

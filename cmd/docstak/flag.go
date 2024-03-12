@@ -18,18 +18,29 @@ package main
 
 import "github.com/spf13/pflag"
 
-var (
+type parseArgResult struct {
 	Verbose *bool
 	Quiet   *bool
 	Help    *bool
+	DryRun  *bool
 	Cmds    []string
-)
+}
 
-func parseArgs() {
-	Verbose = pflag.BoolP("verbose", "v", true, "be verbose (default)")
-	Quiet = pflag.BoolP("quiet", "q", false, "be quiet")
-	Help = pflag.BoolP("help", "h", false, "output help")
+func parseArgs() parseArgResult {
+
+	verbose := pflag.BoolP("verbose", "v", true, "Be verbose (default).")
+	quiet := pflag.BoolP("quiet", "q", false, "Output only error message with stderr.")
+	help := pflag.BoolP("help", "h", false, "Output help information.")
+	dryRun := pflag.Bool("dry-run", false, "Output the operation configuration but do not execute.")
 
 	pflag.Parse()
-	Cmds = pflag.Args()
+	cmds := pflag.Args()
+
+	return parseArgResult{
+		Verbose: verbose,
+		Quiet:   quiet,
+		Help:    help,
+		DryRun:  dryRun,
+		Cmds:    cmds,
+	}
 }

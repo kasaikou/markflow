@@ -25,11 +25,11 @@ import (
 
 func TestFlag(t *testing.T) {
 	os.Args = append(os.Args, "-v", "-q", "fmt", "test")
-	parseArgs()
+	args := parseArgs()
 
-	assert.Equal(t, true, *Verbose)
-	assert.Equal(t, true, *Quiet)
-	assert.Equal(t, false, *Help)
-	assert.Contains(t, Cmds, "fmt")
-	assert.Contains(t, Cmds, "test")
+	assert.Equal(t, true, *args.Verbose)
+	assert.Equal(t, true, *args.Quiet)
+	assert.Equal(t, false, *args.Help)
+	assert.Contains(t, args.Cmds, "fmt")
+	assert.Contains(t, args.Cmds, "test")
 }
