@@ -82,8 +82,8 @@ type ParseResultTaskConfigFiles struct {
 }
 
 type ParseResultCommand struct {
-	Lang string
-	Code string
+	Lang string `json:"lang"`
+	Code string `json:"code"`
 }
 
 var (
