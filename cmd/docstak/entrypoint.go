@@ -63,7 +63,8 @@ func entrypoint(args parseArgResult) int {
 	}
 
 	switch len(enabledFeature) {
-	case 0:
+
+	case 0: // Default feature (execute task).
 		return run(ctx, args)
 
 	case 1:

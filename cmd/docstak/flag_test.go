@@ -18,7 +18,6 @@ package main
 
 import (
 	"encoding/json"
-	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -27,8 +26,7 @@ import (
 func P[T any](val T) *T { return &val }
 
 func TestFlag(t *testing.T) {
-	os.Args = append(os.Args[:1], "-v", "-q", "fmt", "test")
-	resultArgs := parseArgs()
+	resultArgs := parseArgs([]string{"-v", "-q", "fmt", "test"})
 	expect := parseArgResult{
 		Verbose: P(true),
 		Quiet:   P(true),

@@ -26,14 +26,15 @@ type parseArgResult struct {
 	Cmds    []string `json:"cmds,omitempty"`
 }
 
-func parseArgs() parseArgResult {
+func parseArgs(args []string) parseArgResult {
 
+	pflag := pflag.NewFlagSet("", pflag.ExitOnError)
 	verbose := pflag.BoolP("verbose", "v", true, "Be verbose (default).")
 	quiet := pflag.BoolP("quiet", "q", false, "Output only error message with stderr.")
 	help := pflag.BoolP("help", "h", false, "Output help information.")
 	dryRun := pflag.Bool("dry-run", false, "Output the operation configuration but do not execute.")
 
-	pflag.Parse()
+	pflag.Parse(args)
 	cmds := pflag.Args()
 
 	return parseArgResult{
