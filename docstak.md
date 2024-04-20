@@ -62,7 +62,8 @@ skips:
 ```
 
 ```sh
-go mod tidy && git diff --no-patch --exit-code go.sum
+go mod tidy &&
+git diff --no-patch --exit-code go.sum
 ```
 
 ### ci/fmt
