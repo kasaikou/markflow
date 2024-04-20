@@ -19,5 +19,5 @@ package main
 import "os"
 
 func main() {
-	os.Exit(entrypoint(parseArgs()))
+	os.Exit(entrypoint(parseArgs(os.Args[1:])))
 }

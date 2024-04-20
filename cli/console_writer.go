@@ -18,7 +18,6 @@ package cli
 
 import (
 	"bytes"
-	"fmt"
 	"io"
 	"os"
 
@@ -162,7 +161,6 @@ func TerminalWidth() LoggerOption {
 
 func TerminalAutoDetect(file *os.File) LoggerOption {
 	if term.IsTerminal(int(file.Fd())) {
-		fmt.Println("terminal mode")
 		return TerminalWidth()
 	} else {
 		return UnlimitedWidth()

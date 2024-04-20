@@ -17,19 +17,25 @@ limitations under the License.
 package main
 
 import (
-	"os"
+	"encoding/json"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func TestFlag(t *testing.T) {
-	os.Args = append(os.Args, "-v", "-q", "fmt", "test")
-	args := parseArgs()
+func P[T any](val T) *T { return &val }
 
-	assert.Equal(t, true, *args.Verbose)
-	assert.Equal(t, true, *args.Quiet)
-	assert.Equal(t, false, *args.Help)
-	assert.Contains(t, args.Cmds, "fmt")
-	assert.Contains(t, args.Cmds, "test")
+func TestFlag(t *testing.T) {
+	resultArgs := parseArgs([]string{"-v", "-q", "fmt", "test"})
+	expect := parseArgResult{
+		Verbose: P(true),
+		Quiet:   P(true),
+		Help:    P(false),
+		DryRun:  P(false),
+		Cmds:    []string{"fmt", "test"},
+	}
+
+	resultJson, _ := json.MarshalIndent(resultArgs, "", "  ")
+	expectJson, _ := json.MarshalIndent(expect, "", "  ")
+	assert.Equal(t, string(expectJson), string(resultJson))
 }

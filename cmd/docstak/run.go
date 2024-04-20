@@ -45,6 +45,10 @@ func run(ctx context.Context, args parseArgResult) int {
 
 	logger := slog.New(cw.NewLoggerHandler(nil))
 	ctx = docstak.WithLogger(ctx, logger)
+	if len(args.Cmds) < 1 {
+		logger.Error("set no task")
+		return -1
+	}
 	document, success := app.NewLocalDocument(ctx)
 	if !success {
 		return -1

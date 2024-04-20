@@ -19,21 +19,22 @@ package main
 import "github.com/spf13/pflag"
 
 type parseArgResult struct {
-	Verbose *bool
-	Quiet   *bool
-	Help    *bool
-	DryRun  *bool
-	Cmds    []string
+	Verbose *bool    `json:"verbose,omitempty"`
+	Quiet   *bool    `json:"quiet,omitempty"`
+	Help    *bool    `json:"help,omitempty"`
+	DryRun  *bool    `json:"dry_run,omitempty"`
+	Cmds    []string `json:"cmds,omitempty"`
 }
 
-func parseArgs() parseArgResult {
+func parseArgs(args []string) parseArgResult {
 
+	pflag := pflag.NewFlagSet("", pflag.ExitOnError)
 	verbose := pflag.BoolP("verbose", "v", true, "Be verbose (default).")
 	quiet := pflag.BoolP("quiet", "q", false, "Output only error message with stderr.")
 	help := pflag.BoolP("help", "h", false, "Output help information.")
 	dryRun := pflag.Bool("dry-run", false, "Output the operation configuration but do not execute.")
 
-	pflag.Parse()
+	pflag.Parse(args)
 	cmds := pflag.Args()
 
 	return parseArgResult{

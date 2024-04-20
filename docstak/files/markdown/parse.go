@@ -37,10 +37,10 @@ type FileEnvironment struct {
 }
 
 type ParseResult struct {
-	Title       string
-	Description string
-	Tasks       []ParseResultTask
-	Config      ParseResultGlobalConfig
+	Title       string                  `json:"title"`
+	Description string                  `json:"description"`
+	Tasks       []ParseResultTask       `json:"tasks,omitempty"`
+	Config      ParseResultGlobalConfig `json:"config,omitempty"`
 }
 
 type ParseResultGlobalConfig struct {
@@ -49,41 +49,41 @@ type ParseResultGlobalConfig struct {
 }
 
 type ParseResultTask struct {
-	Title        string
-	HeadingLavel int
-	Description  string
-	Config       ParseResultTaskConfig
-	Commands     []ParseResultCommand
+	Title        string                `json:"title"`
+	HeadingLevel int                   `json:"heading-level"`
+	Description  string                `json:"description"`
+	Config       ParseResultTaskConfig `json:"config,omitempty"`
+	Commands     []ParseResultCommand  `json:"commands,omitempty"`
 }
 
 type ParseResultTaskConfig struct {
-	Environ  ParseResultTaskConfigEnvs     `json:"environ" yaml:"environ"`
-	Requires ParseResultTaskConfigRequires `json:"requires" yaml:"requires"`
-	Skips    ParseResultTaskConfigSkips    `json:"skips" yaml:"skips"`
-	Previous []string                      `json:"previous" yaml:"previous"`
+	Environ  ParseResultTaskConfigEnvs     `json:"environ,omitempty" yaml:"environ"`
+	Requires ParseResultTaskConfigRequires `json:"requires,omitempty" yaml:"requires"`
+	Skips    ParseResultTaskConfigSkips    `json:"skips,omitempty" yaml:"skips"`
+	Previous []string                      `json:"previous,omitempty" yaml:"previous"`
 }
 
 type ParseResultTaskConfigEnvs struct {
-	Dotenvs   []string          `json:"dotenv" yaml:"dotenv"`
-	Variables map[string]string `json:"vars" yaml:"vars"`
+	Dotenvs   []string          `json:"dotenv,omitempty" yaml:"dotenv"`
+	Variables map[string]string `json:"vars,omitempty" yaml:"vars"`
 }
 
 type ParseResultTaskConfigSkips struct {
-	File ParseResultTaskConfigFiles `json:"file" yaml:"file"`
+	File ParseResultTaskConfigFiles `json:"file,omitempty" yaml:"file"`
 }
 
 type ParseResultTaskConfigRequires struct {
-	File ParseResultTaskConfigFiles `json:"file" yaml:"file"`
+	File ParseResultTaskConfigFiles `json:"file,omitempty" yaml:"file"`
 }
 
 type ParseResultTaskConfigFiles struct {
-	Exists      []string `json:"exist" yaml:"exist"`
-	NotChangeds []string `json:"not-changed" yaml:"not-changed"`
+	Exists      []string `json:"exist,omitempty" yaml:"exist"`
+	NotChangeds []string `json:"not-changed,omitempty" yaml:"not-changed"`
 }
 
 type ParseResultCommand struct {
-	Lang string
-	Code string
+	Lang string `json:"lang"`
+	Code string `json:"code"`
 }
 
 var (
@@ -133,7 +133,7 @@ func ParseMarkdown(ctx context.Context, markdown MarkdownOption) (ParseResult, e
 			}
 			result.Tasks = append(result.Tasks, ParseResultTask{
 				Title:        titleStr,
-				HeadingLavel: node.Level,
+				HeadingLevel: node.Level,
 			})
 			selected = &result.Tasks[len(result.Tasks)-1]
 
