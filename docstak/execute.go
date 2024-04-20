@@ -45,6 +45,7 @@ func newExecuteOptions() *executeOptions {
 
 type ExecuteOption func(eo *executeOptions) error
 
+// An optional argument for setting subcommands in the Execute() function.
 func ExecuteOptCalls(keys ...string) ExecuteOption {
 	return func(eo *executeOptions) error {
 		eo.called = append(eo.called, keys...)
@@ -52,6 +53,7 @@ func ExecuteOptCalls(keys ...string) ExecuteOption {
 	}
 }
 
+// An optional argument for setting pre- and post-processing when executing tasks using Execute() function.
 func ExecuteOptProcessExec(fn func(ctx context.Context, task model.DocumentTask, runner *srun.ScriptRunner) (int, error)) ExecuteOption {
 	return func(eo *executeOptions) error {
 		eo.onExec = fn
@@ -59,6 +61,7 @@ func ExecuteOptProcessExec(fn func(ctx context.Context, task model.DocumentTask,
 	}
 }
 
+// Plan and execute the task.
 func ExecuteContext(ctx context.Context, document model.Document, options ...ExecuteOption) int {
 
 	logger := GetLogger(ctx)
@@ -95,6 +98,7 @@ func ExecuteContext(ctx context.Context, document model.Document, options ...Exe
 	return executeTasks(ctx, document, option, tasks)
 }
 
+// Plan and execute the task.
 func executeTasks(ctx context.Context, document model.Document, option *executeOptions, executeTasks []string) int {
 	wg := sync.WaitGroup{}
 
@@ -110,6 +114,7 @@ func executeTasks(ctx context.Context, document model.Document, option *executeO
 	defer cancel()
 	taskChs := make([]chan taskResp, 0, len(executeTasks))
 
+	// Create a Goroutine for each task.
 	for i := range executeTasks {
 		ch := make(chan taskResp, len(executeTasks))
 		defer close(ch)
@@ -125,6 +130,7 @@ func executeTasks(ctx context.Context, document model.Document, option *executeO
 
 			<-chEnded
 
+			// Wait for ctx.Done() or dependent tasks finish.
 			for len(depends) > 0 {
 				select {
 				case <-ctx.Done():
@@ -134,6 +140,15 @@ func executeTasks(ctx context.Context, document model.Document, option *executeO
 				}
 			}
 
+			// Terminates when there no scripts set for the task.
+			if len(task.Scripts) == 0 {
+				chRes <- taskResp{
+					Call: task.Call,
+					Exit: 0,
+				}
+			}
+
+			// Execute one or more set in a task in parallel using Goroutine.
 			ch := make(chan taskResp)
 			wg := sync.WaitGroup{}
 			for j := range task.Scripts {
@@ -153,24 +168,17 @@ func executeTasks(ctx context.Context, document model.Document, option *executeO
 			}
 			defer wg.Wait()
 
+			// Wait for all scripts run in Goroutine finish.
 			ended := 0
-
-			if len(task.Scripts) == 0 {
-				chRes <- taskResp{
-					Call: task.Call,
-					Exit: 0,
-				}
-			}
-
 			for ended < len(task.Scripts) {
 				select {
 				case <-ctx.Done():
 					return
 				case result := <-ch:
 					ended++
-					if ended >= len(task.Scripts) {
+					if ended >= len(task.Scripts) { // If all tasks are finished.
 						chRes <- result
-					} else if result.Exit != 0 {
+					} else if result.Exit != 0 { // If the script fails.
 						chRes <- result
 					}
 				}
@@ -187,6 +195,7 @@ func executeTasks(ctx context.Context, document model.Document, option *executeO
 		taskChs[i] <- taskResp{}
 	}
 
+	// Wait for all tasks finish in Goroutine finish.
 	for {
 		select {
 		case <-ctx.Done():
@@ -209,9 +218,11 @@ func executeTasks(ctx context.Context, document model.Document, option *executeO
 	}
 }
 
+// Execute task with executeOptions
 func executeTask(ctx context.Context, task model.DocumentTask, script model.DocumentTaskScript, option *executeOptions) int {
 	logger := GetLogger(ctx)
 
+	// Generate script runner with script, command, and command's args.
 	runner := srun.NewScriptRunner(script.Config.ExecPath, script.Config.CmdOpt, script.Script, script.Config.Args...)
 
 	for key, value := range task.Envs {
