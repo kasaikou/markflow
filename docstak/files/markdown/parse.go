@@ -50,7 +50,7 @@ type ParseResultGlobalConfig struct {
 
 type ParseResultTask struct {
 	Title        string
-	HeadingLavel int
+	HeadingLevel int
 	Description  string
 	Config       ParseResultTaskConfig
 	Commands     []ParseResultCommand
@@ -133,7 +133,7 @@ func ParseMarkdown(ctx context.Context, markdown MarkdownOption) (ParseResult, e
 			}
 			result.Tasks = append(result.Tasks, ParseResultTask{
 				Title:        titleStr,
-				HeadingLavel: node.Level,
+				HeadingLevel: node.Level,
 			})
 			selected = &result.Tasks[len(result.Tasks)-1]
 
