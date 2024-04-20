@@ -19,11 +19,11 @@ package main
 import "github.com/spf13/pflag"
 
 type parseArgResult struct {
-	Verbose *bool
-	Quiet   *bool
-	Help    *bool
-	DryRun  *bool
-	Cmds    []string
+	Verbose *bool    `json:"verbose,omitempty"`
+	Quiet   *bool    `json:"quiet,omitempty"`
+	Help    *bool    `json:"help,omitempty"`
+	DryRun  *bool    `json:"dry_run,omitempty"`
+	Cmds    []string `json:"cmds,omitempty"`
 }
 
 func parseArgs() parseArgResult {
