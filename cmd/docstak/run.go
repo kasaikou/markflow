@@ -24,12 +24,12 @@ import (
 	"sync"
 	"syscall"
 
-	"github.com/kasaikou/docstak/app"
-	"github.com/kasaikou/docstak/cli"
-	"github.com/kasaikou/docstak/docstak"
-	"github.com/kasaikou/docstak/docstak/condition"
-	"github.com/kasaikou/docstak/docstak/model"
-	"github.com/kasaikou/docstak/docstak/srun"
+	"github.com/kasaikou/markflow/app"
+	"github.com/kasaikou/markflow/cli"
+	"github.com/kasaikou/markflow/docstak"
+	"github.com/kasaikou/markflow/docstak/condition"
+	"github.com/kasaikou/markflow/docstak/model"
+	"github.com/kasaikou/markflow/docstak/srun"
 )
 
 func run(ctx context.Context, args parseArgResult) int {

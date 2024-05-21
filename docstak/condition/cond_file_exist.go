@@ -19,7 +19,7 @@ package condition
 import (
 	"context"
 
-	"github.com/kasaikou/docstak/docstak/resolver"
+	"github.com/kasaikou/markflow/docstak/resolver"
 )
 
 type FileIsExisted struct {

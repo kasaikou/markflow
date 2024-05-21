@@ -22,11 +22,11 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/kasaikou/docstak/docstak"
-	"github.com/kasaikou/docstak/docstak/files/markdown"
-	"github.com/kasaikou/docstak/docstak/files/statefile"
-	"github.com/kasaikou/docstak/docstak/model"
-	"github.com/kasaikou/docstak/docstak/resolver"
+	"github.com/kasaikou/markflow/docstak"
+	"github.com/kasaikou/markflow/docstak/files/markdown"
+	"github.com/kasaikou/markflow/docstak/files/statefile"
+	"github.com/kasaikou/markflow/docstak/model"
+	"github.com/kasaikou/markflow/docstak/resolver"
 )
 
 var LanguageCmdPairs = []resolver.ResolveOption{

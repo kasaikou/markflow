@@ -24,7 +24,7 @@ import (
 	"os"
 	"sort"
 
-	"github.com/kasaikou/docstak/docstak/resolver"
+	"github.com/kasaikou/markflow/docstak/resolver"
 )
 
 type FileNotChanged struct {

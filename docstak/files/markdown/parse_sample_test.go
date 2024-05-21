@@ -44,10 +44,10 @@ func TestParseSample(t *testing.T) {
 	}
 
 	expect := ParseResult{
-		Title: "Scripts for github.com/kasaikou/docstak developpers",
+		Title: "Scripts for github.com/kasaikou/markflow developpers",
 		Tasks: []ParseResultTask{
 			{
-				Title:        "Scripts for github.com/kasaikou/docstak developpers",
+				Title:        "Scripts for github.com/kasaikou/markflow developpers",
 				HeadingLevel: 1,
 			},
 			{

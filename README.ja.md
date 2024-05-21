@@ -1,6 +1,8 @@
 <div align="center">
 
-# docstak: Task Runner as a Document (TRaaD) tool<br>🐶🥞
+# markflow: Task Runner as a Document (TRaaD) tool<br>🐶🥞
+
+> Legacy version is docstak.
 
 [[English](./README.md)] [[日本語](./README.ja.md)]
 
