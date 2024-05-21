@@ -24,7 +24,7 @@ import (
 	"unsafe"
 
 	"github.com/cockroachdb/errors"
-	"github.com/kasaikou/docstak/docstak/resolver"
+	"github.com/kasaikou/markflow/docstak/resolver"
 
 	"github.com/yuin/goldmark"
 	"github.com/yuin/goldmark/ast"

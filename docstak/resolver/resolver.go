@@ -21,7 +21,7 @@ import (
 	"os/exec"
 
 	"github.com/cockroachdb/errors"
-	"github.com/kasaikou/docstak/docstak/model"
+	"github.com/kasaikou/markflow/docstak/model"
 )
 
 type ResolveOption struct {

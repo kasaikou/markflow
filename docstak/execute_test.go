@@ -22,8 +22,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/kasaikou/docstak/docstak"
-	"github.com/kasaikou/docstak/docstak/model"
+	"github.com/kasaikou/markflow/docstak"
+	"github.com/kasaikou/markflow/docstak/model"
 )
 
 func TestExecute(t *testing.T) {

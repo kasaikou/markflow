@@ -22,8 +22,8 @@ import (
 	"os"
 	"sync"
 
-	"github.com/kasaikou/docstak/cli"
-	"github.com/kasaikou/docstak/docstak"
+	"github.com/kasaikou/markflow/cli"
+	"github.com/kasaikou/markflow/docstak"
 )
 
 func entrypoint(args parseArgResult) int {

@@ -2,6 +2,8 @@
 
 # docstak: Task Runner as a Document (TRaaD) tool<br>🐶🥞
 
+> Legacy version is docstak.
+
 [[English](./README.md)] [[日本語](./README.ja.md)]
 
 [![codecov](https://codecov.io/gh/kasaikou/docstak/graph/badge.svg?token=QZTCJ1A852)](https://codecov.io/gh/kasaikou/docstak)

@@ -22,8 +22,8 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/kasaikou/docstak/app"
-	"github.com/kasaikou/docstak/docstak"
+	"github.com/kasaikou/markflow/app"
+	"github.com/kasaikou/markflow/docstak"
 )
 
 func dryrun(ctx context.Context, args parseArgResult) int {

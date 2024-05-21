@@ -21,9 +21,9 @@ import (
 	"log/slog"
 
 	"github.com/bmatcuk/doublestar/v4"
-	"github.com/kasaikou/docstak/docstak"
-	"github.com/kasaikou/docstak/docstak/model"
-	"github.com/kasaikou/docstak/docstak/resolver"
+	"github.com/kasaikou/markflow/docstak"
+	"github.com/kasaikou/markflow/docstak/model"
+	"github.com/kasaikou/markflow/docstak/resolver"
 )
 
 type Skips struct {

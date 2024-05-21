@@ -24,8 +24,8 @@ import (
 	"runtime"
 	"sync"
 
-	"github.com/kasaikou/docstak/docstak/model"
-	"github.com/kasaikou/docstak/docstak/srun"
+	"github.com/kasaikou/markflow/docstak/model"
+	"github.com/kasaikou/markflow/docstak/srun"
 )
 
 type executeOptions struct {
