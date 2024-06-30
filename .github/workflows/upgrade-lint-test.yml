@@ -2,6 +2,7 @@ on:
   pull_request:
     branches:
       - main
+      - upgrade-markflow/main
 jobs:
   lint:
     runs-on: ubuntu-latest
