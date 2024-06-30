@@ -6,6 +6,8 @@ on:
       - go.sum
       - .github/workflows/lint-test.yml
       - docstak.md
+    branches-ignore:
+      - upgrade-markflow/*
   workflow_dispatch:
 jobs:
   lint-test:
